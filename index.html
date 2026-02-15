@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>경기냉동</title>
+    <style>
+        :root { --primary: #004085; --bg: #f4f7f6; --border: #ddd; }
+        body { margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; background: var(--bg); padding-bottom: 140px; color: #333; }
+        header { background: var(--primary); color: white; padding: 15px; font-weight: bold; text-align: center; font-size: 1.5rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); letter-spacing: 2px; font-family: 'Arial', sans-serif; }
+        .view-container { display: none; padding: 15px; }
+        .active-view { display: block; }
+        .day-cell.selected { background: #004085 !important; color: white !important; border: 2px solid #ffc107 !important; }
+        .day-cell.selected .badge { background: white; color: #004085; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; font-size: 1.1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .cal-btn { background: none; border: none; font-size: 1.2rem; padding: 5px 15px; cursor: pointer; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: white; padding: 10px; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .day-cell { height: 65px; border: 1px solid #f0f0f0; border-radius: 8px; position: relative; display: flex; flex-direction: column; padding: 4px; font-size: 0.9rem; cursor: pointer; }
+        .day-cell.today { border: 2px solid var(--primary); background: #eef6ff; }
+        .badge { position: absolute; bottom: 3px; right: 3px; background: #dc3545; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; display: none; }
+        .badge.show { display: block; }
+        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); cursor: pointer; border-left: 5px solid var(--primary); }
+        .card-top { display: flex; justify-content: space-between; margin-bottom: 5px; font-weight: bold; font-size: 1.1rem; }
+        .card-sub { color: #666; font-size: 0.9rem; margin-bottom: 2px; }
+        .card-price { color: #0056b3; font-weight: bold; }
+        label { display: block; margin: 15px 0 5px; font-weight: bold; font-size: 0.95rem; color: #444; }
+        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-size: 1rem; margin-bottom: 5px; }
+        .part-input-box { display: flex; flex-wrap: wrap; gap: 5px; background: #fff; padding: 10px; border-radius: 8px; border: 1px solid var(--border); margin-bottom: 10px; }
+        .part-input-box input { flex: 1; min-width: 45%; margin-bottom: 0; padding: 8px; font-size: 0.9rem; }
+        .part-list { background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 10px; }
+        .part-item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
+        .btn-mini { width: 100%; padding: 10px; background: #6c757d; color: white; border: none; border-radius: 6px; font-weight: bold; margin-top: 5px; }
+        .total-box { background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: right; font-size: 1.3rem; font-weight: bold; color: #004085; margin-top: 10px; }
+        .photo-area { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+        .photo-prev { width: 80px; height: 80px; background-size: cover; border-radius: 8px; border: 1px solid #ddd; flex-shrink: 0; position: relative; }
+        .btn-add-photo { width: 80px; height: 80px; border: 2px dashed #ccc; display: flex; justify-content: center; align-items: center; border-radius: 8px; color: #aaa; font-size: 24px; cursor: pointer; }
+        .btn-main { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; color: white; margin-top: 12px; font-size: 1.1rem; cursor: pointer; }
+        .bg-blue { background: var(--primary); }
+        .bg-green { background: #28a745; }
+        .bg-gray { background: #6c757d; }
+        .bg-red { background: #c82333; }
+        footer { text-align: center; padding: 20px 10px; color: #888; font-size: 0.8rem; border-top: 1px solid #eee; margin-top: 30px; line-height: 1.6; }
+        footer b { color: #333; font-size: 1rem; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; padding: 8px 5px; box-sizing: border-box; z-index: 99; }
+        .nav-btn { flex: 1; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; text-decoration: none; font-size: 0.75rem; font-weight: bold; }
+        .nav-btn.active { color: var(--primary); }
+    </style>
+</head>
+<body>
+    <header id="headerTitle">경기냉동</header>
+
+    <div id="viewCalendar" class="view-container active-view">
+        <div class="cal-header">
+            <button class="cal-btn" onclick="changeMonth(-1)">◀</button>
+            <span id="currentMonthStr"></span>
+            <button class="cal-btn" onclick="changeMonth(1)">▶</button>
+        </div>
+        <div class="cal-grid" id="calendarGrid"></div>
+        <h3 style="margin:20px 0 10px; font-size:1rem; color:#555; border-bottom:2px solid var(--primary); display:inline-block; padding-bottom:5px;">작업 목록</h3>
+        <div id="dailyList"></div>
+    </div>
+
+    <div id="viewForm" class="view-container">
+        <input type="hidden" id="editId">
+        <label>📅 날짜</label><input type="date" id="inDate">
+        <label>🏢 업체명</label><input type="text" id="inName" placeholder="업체명을 입력하세요">
+        <label>📞 연락처/주소</label><input type="text" id="inInfo" placeholder="연락처 또는 주소">
+        <label>📝 작업 내용</label>
+        <textarea id="inAction" rows="3" placeholder="작업 상세 내용을 입력하세요"></textarea>
+        
+        <label>🔧 사용 부품 및 자재</label>
+        <div class="part-input-box">
+            <input type="text" id="partName" list="partSuggestions" placeholder="부품명" style="min-width: 100%; margin-bottom: 5px;">
+            <datalist id="partSuggestions"></datalist>
+            <input type="number" id="partBuyPrice" placeholder="구입가(원)">
+            <input type="number" id="partPrice" placeholder="판매가(원)">
+            <input type="number" id="partQty" placeholder="수량" style="min-width: 20%;">
+            <button class="btn-mini" onclick="addPart()">+ 부품 추가</button>
+        </div>
+        <div id="addedPartsList" class="part-list" style="display:none;"></div>
+        
+        <label>💰 공임비 (기술료)</label>
+        <input type="number" id="inLabor" value="0" oninput="calcTotal()">
+        <div class="total-box">합계: <span id="displayTotal">0</span>원</div>
+        <label>📷 현장 사진</label>
+        <div class="photo-area" id="photoArea">
+            <label class="btn-add-photo">+<input type="file" accept="image/*" style="none;" onchange="handleAddPhoto(this)"></label>
+        </div>
+        <button class="btn-main bg-blue" onclick="saveData()">저장 완료</button>
+        <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none; margin-top:20px;">🗑️ 삭제하기</button>
+    </div>
+
+    <div id="viewSearch" class="view-container">
+        <input type="text" placeholder="업체명 검색..." oninput="doSearch(this.value)" style="padding:15px;">
+        <div id="searchResult" style="margin-top:15px;"></div>
+    </div>
+
+    <div id="viewSettings" class="view-container">
+        <div style="background:white; padding:20px; border-radius:12px; text-align:center; margin-bottom:20px;">
+            <h3>📤 데이터 백업</h3>
+            <button class="btn-main bg-green" onclick="shareData()">백업 파일 전송</button>
+        </div>
+        <div style="background:white; padding:20px; border-radius:12px; text-align:center; border:2px dashed #ccc;">
+            <h3>📥 데이터 복구</h3>
+            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
+            <button class="btn-main bg-gray" onclick="document.getElementById('importFile').click()">파일 불러오기</button>
+        </div>
+    </div>
+
+    <footer>
+        <b>경기냉동</b><br>
+        대표: 송기천 | 전화: 010-5422-6705<br>
+        주소: 경기도 고양시 일산서구 덕산로 312번길 15, 103호
+    </footer>
+
+    <div class="bottom-nav">
+        <div class="nav-btn active" onclick="goTab('calendar')">📅<br>달력</div>
+        <div class="nav-btn" onclick="goTab('search')">🔍<br>검색</div>
+        <div class="nav-btn" onclick="openForm()">✏️<br>등록</div>
+        <div class="nav-btn" onclick="goTab('settings')">⚙️<br>설정</div>
+    </div>
+
+    <script>
+        const GOOGLE_SHEET_URL = "여기에_스크립트_URL을_넣으세요";
+        const STORAGE_KEY = 'ggFreezerLogs';
+        let logs = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+        let curYear, curMonth, selDate;
+        let tempParts = [], tempPhotos = [];
+
+        function getLocalDate() {
+            const now = new Date();
+            const offset = now.getTimezoneOffset() * 60000;
+            return new Date(now - offset).toISOString().split('T')[0];
+        }
+
+        function updatePartSuggestions() {
+            const datalist = document.getElementById('partSuggestions');
+            const partNames = new Set();
+            logs.forEach(log => { if (log.parts) log.parts.forEach(p => partNames.add(p.name)); });
+            datalist.innerHTML = Array.from(partNames).map(name => `<option value="${name}">`).join('');
+        }
+
+        window.onload = () => {
+    const now = new Date();
+    curYear = now.getFullYear();
+    curMonth = now.getMonth();
+    selDate = ""; // 초기 선택을 빈값으로 설정
+    renderCal();
+    renderList(selDate); // '기록 없음'이 뜰 것입니다.
+    updatePartSuggestions();
+};
+
+        function renderCal() {
+            document.getElementById('currentMonthStr').innerText = `${curYear}년 ${curMonth+1}월`;
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '<div style="color:red;">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div style="color:blue;">토</div>';
+            const first = new Date(curYear, curMonth, 1).getDay();
+            const last = new Date(curYear, curMonth+1, 0).getDate();
+            const todayStr = getLocalDate();
+            for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
+            for(let d=1; d<=last; d++) {
+                const ymd = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
+                const cnt = logs.filter(l => l.date === ymd).length;
+                const isToday = (ymd === todayStr) ? 'today' : '';
+                const isSelected = (ymd === selDate) ? 'selected' : '';
+                grid.innerHTML += `<div class="day-cell ${isToday} ${isSelected}" onclick="selectDate('${ymd}')"><b>${d}</b><div class="badge ${cnt > 0 ? 'show' : ''}">${cnt}</div></div>`;
+            }
+        }
+
+        function selectDate(ymd) { selDate = ymd; renderCal(); renderList(ymd); }
+        function changeMonth(d) { curMonth += d; if(curMonth<0){curMonth=11; curYear--;} if(curMonth>11){curMonth=0; curYear++;} renderCal(); }
+
+        function addPart() {
+            const name = document.getElementById('partName').value;
+            const buyPrice = Number(document.getElementById('partBuyPrice').value) || 0;
+            const price = Number(document.getElementById('partPrice').value) || 0;
+            const qty = Number(document.getElementById('partQty').value) || 1;
+            if(!name || !price) return alert("부품명과 판매단가를 입력하세요.");
+            tempParts.push({ name, buyPrice, price, qty });
+            document.getElementById('partName').value = '';
+            document.getElementById('partBuyPrice').value = '';
+            document.getElementById('partPrice').value = '';
+            document.getElementById('partQty').value = '';
+            renderParts(); calcTotal();
+        }
+
+        function removePart(idx) { tempParts.splice(idx, 1); renderParts(); calcTotal(); }
+        function renderParts() {
+            const l = document.getElementById('addedPartsList');
+            l.innerHTML = ''; l.style.display = tempParts.length ? 'block' : 'none';
+            tempParts.forEach((p, i) => { 
+                const partTotal = p.price * p.qty;
+                l.innerHTML += `<div class="part-item"><div><b>${p.name}</b><br><small>구입:${p.buyPrice.toLocaleString()} / 단가:${p.price.toLocaleString()} x ${p.qty}</small></div><div><b>${partTotal.toLocaleString()}원</b><button onclick="removePart(${i})" style="color:red;border:none;background:none;margin-left:5px;">X</button></div></div>`; 
+            });
+        }
+
+        function calcTotal() {
+            let labor = Number(document.getElementById('inLabor').value) || 0;
+            let partsTotal = tempParts.reduce((sum, p) => sum + (p.price * p.qty), 0);
+            let tot = labor + partsTotal;
+            document.getElementById('displayTotal').innerText = tot.toLocaleString();
+            return tot;
+        }
+
+        function saveData() {
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('inName').value;
+            if(!name) return alert("업체명 입력 필수");
+            const data = {
+                id: id ? Number(id) : Date.now(),
+                date: document.getElementById('inDate').value,
+                name: name,
+                info: document.getElementById('inInfo').value,
+                action: document.getElementById('inAction').value,
+                labor: Number(document.getElementById('inLabor').value),
+                parts: tempParts, photos: tempPhotos, total: calcTotal()
+            };
+            if(id) { const idx = logs.findIndex(l => l.id == id); logs[idx] = data; } else { logs.push(data); }
+            localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
+            updatePartSuggestions();
+            if (GOOGLE_SHEET_URL !== "여기에_스크립트_URL을_넣으세요") {
+                fetch(GOOGLE_SHEET_URL, { method: 'POST', mode: 'no-cors', body: JSON.stringify(data) })
+                .then(() => { alert("저장 완료"); goTab('calendar'); })
+                .catch(() => { alert("저장 완료 (동기화 실패)"); goTab('calendar'); });
+            } else { alert("저장 완료"); goTab('calendar'); }
+        }
+
+        function openForm(id = null) {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active-view'));
+            document.getElementById('viewForm').classList.add('active-view');
+            tempParts = []; tempPhotos = [];
+            const delBtn = document.getElementById('btnDel');
+            if(id) {
+                const item = logs.find(l => l.id == id);
+                document.getElementById('editId').value = item.id;
+                document.getElementById('inDate').value = item.date;
+                document.getElementById('inName').value = item.name;
+                document.getElementById('inInfo').value = item.info;
+                document.getElementById('inAction').value = item.action;
+                document.getElementById('inLabor').value = item.labor || 0;
+                tempParts = item.parts || []; tempPhotos = item.photos || [];
+                delBtn.style.display = 'block';
+            } else {
+                document.getElementById('editId').value = '';
+                document.getElementById('inDate').value = selDate;
+                document.getElementById('inName').value = '';
+                document.getElementById('inInfo').value = '';
+                document.getElementById('inAction').value = '';
+                document.getElementById('inLabor').value = '';
+                delBtn.style.display = 'none';
+            }
+            renderParts(); renderPhotos(); calcTotal();
+        }
+
+        function renderList(ymd) {
+            const list = document.getElementById('dailyList');
+            list.innerHTML = '';
+            const tgts = logs.filter(l => l.date === ymd);
+            if(tgts.length === 0) { list.innerHTML = '<div style="color:#aaa;padding:20px;text-align:center;">기록 없음</div>'; return; }
+            tgts.forEach(item => {
+                const d = document.createElement('div');
+                d.className = 'card'; d.onclick = () => openForm(item.id);
+                d.innerHTML = `<div class="card-top"><span>${item.name}</span><span class="card-price">￦${Number(item.total).toLocaleString()}</span></div><div class="card-sub">${item.action.substring(0,30)}</div>`;
+                list.appendChild(d);
+            });
+        }
+
+        function goTab(tab) {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active-view'));
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            if(tab === 'calendar') { document.getElementById('viewCalendar').classList.add('active-view'); document.querySelectorAll('.nav-btn')[0].classList.add('active'); renderCal(); renderList(selDate); }
+            else if(tab === 'search') { document.getElementById('viewSearch').classList.add('active-view'); document.querySelectorAll('.nav-btn')[1].classList.add('active'); }
+            else if(tab === 'settings') { document.getElementById('viewSettings').classList.add('active-view'); document.querySelectorAll('.nav-btn')[3].classList.add('active'); }
+        }
+
+        function handleAddPhoto(input) {
+            if(!input.files[0]) return;
+            const r = new FileReader();
+            r.onload = function(e) {
+                const i = new Image();
+                i.onload = function() {
+                    const c = document.createElement('canvas');
+                    const x = c.getContext('2d');
+                    const max = 600; let w=i.width, h=i.height;
+                    if(w>max) { h*=max/w; w=max; }
+                    c.width=w; c.height=h; x.drawImage(i,0,0,w,h);
+                    tempPhotos.push(c.toDataURL('image/jpeg', 0.6)); renderPhotos();
+                }
+                i.src = e.target.result;
+            }
+            r.readAsDataURL(input.files[0]);
+        }
+        function renderPhotos() {
+            const a = document.getElementById('photoArea');
+            while(a.children.length > 1) a.removeChild(a.lastChild);
+            tempPhotos.forEach((s, i) => {
+                const d = document.createElement('div');
+                d.className = 'photo-prev'; d.style.backgroundImage = `url(${s})`;
+                d.onclick = () => { if(confirm("사진 삭제?")) { tempPhotos.splice(i,1); renderPhotos(); } };
+                a.appendChild(d);
+            });
+        }
+        function doSearch(txt) {
+            const res = document.getElementById('searchResult');
+            res.innerHTML = ''; if(!txt) return;
+            const found = logs.filter(l => l.name.includes(txt) || (l.info && l.info.includes(txt)));
+            found.sort((a,b) => b.date.localeCompare(a.date));
+            found.forEach(item => {
+                const d = document.createElement('div');
+                d.className = 'card'; d.onclick = () => openForm(item.id);
+                d.innerHTML = `<div class="card-top"><span>${item.name}</span><span class="card-price">￦${Number(item.total).toLocaleString()}</span></div><div class="card-sub">${item.action.substring(0,30)}</div>`;
+                res.appendChild(d);
+            });
+        }
+        async function shareData() {
+            if(logs.length === 0) return alert("데이터 없음");
+            const str = JSON.stringify(logs);
+            const file = new File([str], `경기냉동_백업_${new Date().toISOString().slice(0,10)}.json`, { type: "application/json" });
+            if (navigator.share) { try { await navigator.share({ files: [file], title: '경기냉동 백업' }); return; } catch (e) {} }
+            const a = document.createElement('a'); a.href = URL.createObjectURL(file); a.download = file.name; a.click();
+        }
+        function importData(input) {
+            const f = input.files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = function(e) { logs = JSON.parse(e.target.result); localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); alert("복구 완료"); goTab('calendar'); }
+            r.readAsText(f);
+        }
+        function delData() { if(confirm("정말 삭제하시겠습니까?")) { const id = document.getElementById('editId').value; logs = logs.filter(l => l.id != id); localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); alert("삭제됨"); goTab('calendar'); } }
+    </script>
+</body>
+</html>
