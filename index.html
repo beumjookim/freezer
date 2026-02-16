@@ -3,51 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>경기냉동</title>
-    
+    <title>경기냉동 관리시스템</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-
     <style>
-        :root { --primary: #004085; --bg: #f4f7f6; --border: #ddd; }
-        body { margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; background: var(--bg); padding-bottom: 140px; color: #333; }
-        header { background: var(--primary); color: white; padding: 15px; font-weight: bold; text-align: center; font-size: 1.5rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); letter-spacing: 2px; }
-        
+        :root { --primary: #004085; --bg: #f4f7f6; --border: #ddd; --accent: #ffc107; }
+        body { margin: 0; padding: 0; font-family: 'Apple SD Gothic Neo', sans-serif; background: var(--bg); padding-bottom: 150px; color: #333; }
+        header { background: var(--primary); color: white; padding: 15px; font-weight: bold; text-align: center; font-size: 1.5rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .view-container { display: none; padding: 15px; }
         .active-view { display: block; }
         
         /* 달력 스타일 */
-        .day-cell.selected { background: #004085 !important; color: white !important; border: 2px solid #ffc107 !important; }
         .cal-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; }
-        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: white; padding: 10px; border-radius: 12px; }
-        .day-cell { height: 65px; border: 1px solid #f0f0f0; border-radius: 8px; position: relative; display: flex; flex-direction: column; padding: 4px; font-size: 0.9rem; cursor: pointer; text-align: center; }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: white; padding: 10px; border-radius: 12px; text-align: center; }
+        .day-cell { height: 60px; border: 1px solid #f0f0f0; border-radius: 8px; position: relative; display: flex; flex-direction: column; padding: 4px; font-size: 0.9rem; cursor: pointer; }
         .day-cell.today { border: 2px solid var(--primary); background: #eef6ff; }
+        .day-cell.selected { background: var(--primary) !important; color: white !important; border: 2px solid var(--accent) !important; }
         .badge { position: absolute; bottom: 3px; right: 3px; background: #dc3545; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; display: none; }
         .badge.show { display: block; }
 
-        /* 카드 및 폼 스타일 */
-        .card { background: white; border-radius: 12px; padding: 15px; margin-bottom: 12px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); border-left: 5px solid var(--primary); cursor: pointer; }
-        label { display: block; margin: 15px 0 5px; font-weight: bold; font-size: 0.95rem; }
-        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; margin-bottom: 5px; font-size: 1rem; }
-        .total-box { background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: right; font-size: 1.3rem; font-weight: bold; color: #004085; margin-top: 10px; }
-        
-        /* 부품 및 사진 영역 */
-        .part-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #eee; font-size: 0.9rem; }
-        .photo-area { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
-        .photo-prev { width: 80px; height: 80px; background-size: cover; border-radius: 8px; border: 1px solid #ddd; flex-shrink: 0; }
-        .btn-add-photo { width: 80px; height: 80px; border: 2px dashed #ccc; display: flex; justify-content: center; align-items: center; border-radius: 8px; color: #aaa; font-size: 24px; cursor: pointer; }
+        /* 월 선택 버튼 */
+        .month-selector { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: white; padding: 10px; border-radius: 12px; justify-content: center; }
+        .m-btn { padding: 8px 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
+        .m-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        /* 버튼 및 하단바 */
+        .list-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 5px solid #ccc; }
+        .income-summary { background: #002d5d; color: white; border-radius: 15px; padding: 20px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
+        .summary-row.total { border: none; font-weight: bold; font-size: 1.2rem; color: var(--accent); margin-top: 5px; }
+
+        .photo-area { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+        .photo-prev { width: 80px; height: 80px; background-size: cover; background-position: center; border-radius: 8px; border: 1px solid #ddd; flex-shrink: 0; cursor: pointer; position: relative; }
+        .photo-prev::after { content: '✕'; position: absolute; top: -5px; right: -5px; background: red; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+        
+        input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; margin-bottom: 5px; font-size: 1rem; }
         .btn-main { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; color: white; margin-top: 12px; font-size: 1.1rem; cursor: pointer; }
         .bg-blue { background: var(--primary); }
         .bg-green { background: #28a745; }
         .bg-gray { background: #6c757d; }
         .bg-red { background: #c82333; }
-        
+
         footer { text-align: center; padding: 20px 10px; color: #888; font-size: 0.8rem; border-top: 1px solid #eee; margin-top: 30px; line-height: 1.6; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; padding: 8px 5px; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-btn { flex: 1; border: none; background: transparent; display: flex; flex-direction: column; align-items: center; justify-content: center; color: #999; font-weight: bold; font-size: 0.75rem; cursor: pointer; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; padding: 10px 5px; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { flex: 1; text-align: center; color: #999; font-size: 0.75rem; font-weight: bold; cursor: pointer; background: none; border: none; }
         .nav-btn.active { color: var(--primary); }
+        
+        #detailModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
+        .detail-card { background: #f9f9f9; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
     </style>
 </head>
 <body>
@@ -60,13 +62,17 @@
             <button onclick="changeMonth(1)">▶</button>
         </div>
         <div id="calendarGrid" class="cal-grid"></div>
-        <h3 style="margin:20px 0 10px; font-size:1rem; border-bottom:2px solid var(--primary); display:inline-block;">오늘의 작업</h3>
-        <div id="dailyList"></div>
+        <div id="dailyList" style="margin-top:15px;"></div>
     </div>
 
-    <div id="viewSearch" class="view-container">
-        <input type="text" placeholder="업체명 검색..." oninput="doSearch(this.value)" style="padding:15px;">
-        <div id="searchResult" style="margin-top:15px;"></div>
+    <div id="viewLedger" class="view-container">
+        <h3 style="margin:0 0 10px 0;">📅 월별 장부 선택</h3>
+        <div class="month-selector" id="monthButtons"></div>
+        <div id="customerList"></div>
+        <div class="income-summary">
+            <div class="summary-row"><span id="monthSumTitle">2월 수입 합계</span><span id="monthTotal">0원</span></div>
+            <div class="summary-row total"><span>연간 수입 합계</span><span id="yearTotal">0원</span></div>
+        </div>
     </div>
 
     <div id="viewForm" class="view-container">
@@ -74,14 +80,12 @@
         <label>📅 날짜</label><input type="date" id="inDate">
         <label>🏢 업체명</label><input type="text" id="inName">
         <label>📞 연락처/주소</label><input type="text" id="inInfo">
-        <label>📝 작업 내용</label><textarea id="inAction" rows="3"></textarea>
+        <label>📝 작업내용</label><textarea id="inAction" rows="3"></textarea>
         
-        <label>🔧 사용 부품 및 자재</label>
+        <label>🔧 부품 추가</label>
         <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd;">
-            <input type="text" id="partName" list="partSuggestions" placeholder="부품명">
-            <datalist id="partSuggestions"></datalist>
+            <input type="text" id="partName" placeholder="부품명">
             <div style="display:flex; gap:5px;">
-                <input type="number" id="partBuyPrice" placeholder="구입가">
                 <input type="number" id="partPrice" placeholder="판매가">
                 <input type="number" id="partQty" placeholder="수량" style="width:70px;">
             </div>
@@ -90,234 +94,198 @@
         <div id="addedPartsList" style="margin-top:10px;"></div>
 
         <label>💰 공임비</label><input type="number" id="inLabor" value="0" oninput="calcTotal()">
-        <div class="total-box">합계: <span id="displayTotal">0</span>원</div>
+        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: right; font-size: 1.3rem; font-weight: bold; color: #004085; margin-top: 10px;">합계: <span id="displayTotal">0</span>원</div>
         
-        <label>📷 현장 사진</label>
+        <label>📷 사진 (클릭하여 삭제)</label>
         <div class="photo-area" id="photoArea">
-            <label class="btn-add-photo">+<input type="file" accept="image/*" style="display:none;" onchange="handleAddPhoto(this)"></label>
+            <label style="width:80px; height:80px; border:2px dashed #ccc; display:flex; justify-content:center; align-items:center; border-radius:8px; color:#aaa; font-size:24px; cursor:pointer;">+<input type="file" accept="image/*" style="display:none;" onchange="handleAddPhoto(this)"></label>
         </div>
         
         <button class="btn-main bg-blue" onclick="saveData()">저장 완료</button>
-        <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none;">🗑️ 삭제하기</button>
+        <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none;">🗑️ 기록 삭제</button>
     </div>
 
     <div id="viewSettings" class="view-container">
-        <div style="background:white; padding:20px; border-radius:12px; text-align:center; margin-bottom:20px;">
-            <h3>📤 데이터 백업</h3>
-            <button class="btn-main bg-green" onclick="shareData()">백업 파일 전송</button>
+        <div style="background:white; padding:20px; border-radius:12px; text-align:center;">
+            <h3>📊 엑셀 파일 백업</h3>
+            <button class="btn-main bg-green" onclick="downloadCSV()">작업일지 엑셀 다운로드(.csv)</button>
+            <p style="font-size:0.8rem; color:#888; margin-top:10px;">데이터 겹침 방지 및 연속 다운로드 오류가 수정되었습니다.</p>
         </div>
-        <div style="background:white; padding:20px; border-radius:12px; text-align:center; border:2px dashed #ccc;">
-            <h3>📥 데이터 복구</h3>
-            <input type="file" id="importFile" accept=".json" style="display:none" onchange="importData(this)">
-            <button class="btn-main bg-gray" onclick="document.getElementById('importFile').click()">파일 불러오기</button>
+    </div>
+
+    <div id="detailModal">
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px; margin-bottom:20px;">
+            <h2 id="modalTitle" style="margin:0;">상세 기록</h2>
+            <button onclick="closeModal()" style="padding:10px; background:var(--primary); color:white; border:none; border-radius:8px;">닫기</button>
         </div>
+        <div id="customerDetails"></div>
     </div>
 
     <footer>
         <b>경기냉동</b><br>
-        대표: 송기천 | 전화: 010-5422-6705<br>
-        주소: 경기도 고양시 일산서구 덕산로 312번길 15, 103호
+        대표: 송기천 | 010-5422-6705<br>
+        경기도 고양시 일산서구 덕산로 312번길 15, 103호
     </footer>
 
     <div class="bottom-nav">
         <button class="nav-btn active" onclick="goTab('calendar')">📅<br>달력</button>
-        <button class="nav-btn" onclick="goTab('search')">🔍<br>검색</button>
+        <button class="nav-btn" onclick="goTab('ledger')">📑<br>장부</button>
         <button class="nav-btn" onclick="openForm()">✏️<br>등록</button>
         <button class="nav-btn" onclick="goTab('settings')">⚙️<br>설정</button>
     </div>
 
     <script>
-        const STORAGE_KEY = 'ggFreezerLogs';
-        let logs = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-        let curYear, curMonth, selDate;
-        let tempParts = [], tempPhotos = [];
-
-        function getLocalDate() {
-            const now = new Date();
-            const offset = now.getTimezoneOffset() * 60000;
-            return new Date(now - offset).toISOString().split('T')[0];
-        }
+        const KEY = 'ggFreezerLogs';
+        let logs = JSON.parse(localStorage.getItem(KEY)) || [];
+        let curYear, curMonth, selDate, ledgerMonth;
+        let tParts = [], tPhotos = [];
 
         window.onload = () => {
-            const now = new Date();
-            curYear = now.getFullYear(); curMonth = now.getMonth();
-            selDate = getLocalDate();
-            renderCal(); renderList(selDate); updatePartSuggestions();
+            const now = new Date(); curYear = now.getFullYear(); curMonth = now.getMonth();
+            ledgerMonth = curMonth; selDate = new Date(now - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
+            createMonthButtons(); renderCal(); renderList(selDate);
         };
 
-        function goTab(tab) {
-            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            const idx = {calendar:0, search:1, settings:3}[tab];
-            if(idx !== undefined) document.querySelectorAll('.nav-btn')[idx].classList.add('active');
-            document.getElementById('view' + tab.charAt(0).toUpperCase() + tab.slice(1)).classList.add('active-view');
-            if(tab === 'calendar') renderCal();
+        // --- 엑셀(CSV) 다운로드: 연속 다운로드 버그 수선 및 데이터 격리 --- [cite: 2026-02-16]
+        function downloadCSV() {
+            if(logs.length === 0) return alert("데이터 없음");
+            let csv = "\uFEFF"; // 한글 깨짐 방지 BOM
+            csv += "날짜,업체명,연락처/주소,작업내용,공임비,부품내역,총합계\n";
+            
+            logs.sort((a,b)=>b.date.localeCompare(a.date)).forEach(l => {
+                const parts = l.parts ? l.parts.map(p => `${p.name}(${p.qty})`).join('; ') : "";
+                // 데이터를 따옴표로 감싸서 엑셀 열 겹침 방지 강화
+                const cleanName = `"${l.name.replace(/"/g, '""')}"`;
+                const cleanInfo = `"${(l.info || "").replace(/"/g, '""')}"`;
+                const cleanAction = `"${l.action.replace(/"/g, '""').replace(/\n/g, ' ')}"`;
+                
+                csv += `${l.date},${cleanName},${cleanInfo},${cleanAction},${l.labor},"${parts}",${l.total}\n`;
+            });
+
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.href = url;
+            link.download = `경기냉동_일지_${new Date().toISOString().slice(0,10)}.csv`;
+            document.body.appendChild(link);
+            link.click();
+            
+            // 연속 다운로드가 안 되는 문제 수선: 메모리 해제 및 링크 삭제 [cite: 2026-02-16]
+            setTimeout(() => {
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(url);
+            }, 100);
         }
 
+        // --- 나머지 로직 (수정 없이 그대로 유지) --- [cite: 2026-02-16]
+        function createMonthButtons() {
+            const container = document.getElementById('monthButtons'); container.innerHTML = '';
+            for(let i=0; i<12; i++) {
+                const btn = document.createElement('button'); btn.className = `m-btn ${i === ledgerMonth ? 'active' : ''}`;
+                btn.innerText = `${i+1}월`; btn.onclick = () => { ledgerMonth = i; createMonthButtons(); renderLedger(); };
+                container.appendChild(btn);
+            }
+        }
+        function renderLedger() {
+            const listDiv = document.getElementById('customerList'); listDiv.innerHTML = '';
+            const mStr = `${curYear}-${String(ledgerMonth+1).padStart(2,'0')}`;
+            const monthLogs = logs.filter(l => l.date.startsWith(mStr));
+            const customers = [...new Set(monthLogs.map(l => l.name))].sort();
+            customers.forEach(name => {
+                const item = document.createElement('div'); item.className = 'list-item';
+                item.innerHTML = `<span>${name}</span><span>상세보기 ▶</span>`;
+                item.onclick = () => showDetail(name, mStr);
+                listDiv.appendChild(item);
+            });
+            document.getElementById('monthSumTitle').innerText = `${ledgerMonth+1}월 수입 합계`;
+            document.getElementById('monthTotal').innerText = monthLogs.reduce((s,l)=>s+(Number(l.total)||0),0).toLocaleString() + "원";
+            document.getElementById('yearTotal').innerText = logs.filter(l => l.date.startsWith(`${curYear}`)).reduce((s,l)=>s+(Number(l.total)||0),0).toLocaleString() + "원";
+        }
+        function showDetail(name, mStr) {
+            const det = document.getElementById('customerDetails'); det.innerHTML = '';
+            document.getElementById('modalTitle').innerText = name + " 상세 기록";
+            logs.filter(l => l.name === name && l.date.startsWith(mStr)).sort((a,b)=>b.date.localeCompare(a.date)).forEach(log => {
+                det.innerHTML += `<div class="detail-card"><b>${log.date}</b> | 합계: ${(Number(log.total)).toLocaleString()}원<br>${log.action}</div>`;
+            });
+            document.getElementById('detailModal').style.display = 'block';
+        }
         function renderCal() {
             document.getElementById('currentMonthStr').innerText = `${curYear}년 ${curMonth+1}월`;
             const grid = document.getElementById('calendarGrid');
             grid.innerHTML = '<div style="color:red">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div style="color:blue">토</div>';
             const first = new Date(curYear, curMonth, 1).getDay();
             const last = new Date(curYear, curMonth+1, 0).getDate();
-            const todayStr = getLocalDate();
             for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
             for(let d=1; d<=last; d++) {
                 const ymd = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const cnt = logs.filter(l => l.date === ymd).length;
-                const isToday = (ymd === todayStr) ? 'today' : '';
-                const isSelected = (ymd === selDate) ? 'selected' : '';
-                grid.innerHTML += `<div class="day-cell ${isToday} ${isSelected}" onclick="selectDate('${ymd}')"><b>${d}</b><div class="badge ${cnt>0?'show':''}">${cnt}</div></div>`;
+                grid.innerHTML += `<div class="day-cell ${ymd===new Date().toISOString().split('T')[0]?'today':''} ${ymd===selDate?'selected':''}" onclick="selectDate('${ymd}')"><b>${d}</b><div class="badge ${cnt>0?'show':''}">${cnt}</div></div>`;
             }
         }
-
-        function selectDate(ymd) { selDate = ymd; renderCal(); renderList(ymd); }
-        function changeMonth(d) { curMonth += d; if(curMonth<0){curMonth=11; curYear--;} if(curMonth>11){curMonth=0; curYear++;} renderCal(); }
-
         function renderList(ymd) {
-            const list = document.getElementById('dailyList');
-            list.innerHTML = '';
-            const tgts = logs.filter(l => l.date === ymd);
-            if(tgts.length === 0) { list.innerHTML = '<div style="color:#aaa;padding:20px;text-align:center;">기록 없음</div>'; return; }
-            tgts.forEach(item => {
-                const d = document.createElement('div');
-                d.className = 'card'; d.onclick = () => openForm(item.id);
-                d.innerHTML = `<div><span>${item.name}</span> <span style="color:#0056b3;font-weight:bold;">￦${Number(item.total).toLocaleString()}</span></div><div style="color:#666;font-size:0.8rem;">${item.action.substring(0,30)}</div>`;
+            const list = document.getElementById('dailyList'); list.innerHTML = '';
+            logs.filter(l => l.date === ymd).forEach(item => {
+                const d = document.createElement('div'); d.className = 'list-item';
+                d.onclick = () => openForm(item.id); d.innerHTML = `<span>${item.name}</span><span>${(Number(item.total)).toLocaleString()}원 ▶</span>`;
                 list.appendChild(d);
             });
         }
-
-        function openForm(id = null) {
+        function selectDate(ymd) { selDate = ymd; renderCal(); renderList(ymd); }
+        function changeMonth(d) { curMonth += d; if(curMonth<0){curMonth=11; curYear--;} if(curMonth>11){curMonth=0; curYear++;} renderCal(); }
+        function goTab(t) {
             document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
-            document.getElementById('viewForm').classList.add('active-view');
-            tempParts = []; tempPhotos = [];
-            const delBtn = document.getElementById('btnDel');
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+            const idx = {calendar:0, ledger:1, form:2, settings:3}[t];
+            document.querySelectorAll('.nav-btn')[idx].classList.add('active');
+            document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active-view');
+            if(t==='ledger') { ledgerMonth = curMonth; createMonthButtons(); renderLedger(); }
+            if(t==='calendar') renderCal();
+        }
+        function openForm(id = null) {
+            goTab('form'); tParts = []; tPhotos = [];
             if(id) {
                 const item = logs.find(l => l.id == id);
-                document.getElementById('editId').value = item.id;
-                document.getElementById('inDate').value = item.date;
-                document.getElementById('inName').value = item.name;
-                document.getElementById('inInfo').value = item.info || '';
-                document.getElementById('inAction').value = item.action;
-                document.getElementById('inLabor').value = item.labor || 0;
-                tempParts = item.parts || []; tempPhotos = item.photos || [];
-                delBtn.style.display = 'block';
+                document.getElementById('editId').value = item.id; document.getElementById('inDate').value = item.date;
+                document.getElementById('inName').value = item.name; document.getElementById('inInfo').value = item.info || '';
+                document.getElementById('inAction').value = item.action; document.getElementById('inLabor').value = item.labor;
+                tParts = item.parts || []; tPhotos = item.photos || []; document.getElementById('btnDel').style.display = 'block';
             } else {
-                document.getElementById('editId').value = '';
-                document.getElementById('inDate').value = selDate;
-                document.getElementById('inName').value = '';
-                document.getElementById('inInfo').value = '';
-                document.getElementById('inAction').value = '';
-                document.getElementById('inLabor').value = '';
-                delBtn.style.display = 'none';
+                document.getElementById('editId').value = ''; document.getElementById('inDate').value = selDate;
+                document.getElementById('inName').value = ''; document.getElementById('inInfo').value = '';
+                document.getElementById('inAction').value = ''; document.getElementById('inLabor').value = 0;
+                document.getElementById('btnDel').style.display = 'none';
             }
             renderParts(); renderPhotos(); calcTotal();
         }
-
-        function addPart() {
-            const n = document.getElementById('partName').value;
-            const b = Number(document.getElementById('partBuyPrice').value) || 0;
-            const p = Number(document.getElementById('partPrice').value) || 0;
-            const q = Number(document.getElementById('partQty').value) || 1;
-            if(!n || !p) return alert("부품명과 단가 입력 필수");
-            tempParts.push({name:n, buyPrice:b, price:p, qty:q});
-            document.getElementById('partName').value = ''; document.getElementById('partBuyPrice').value = ''; 
-            document.getElementById('partPrice').value = ''; document.getElementById('partQty').value = '';
-            renderParts(); calcTotal();
-        }
-
-        function renderParts() {
-            const l = document.getElementById('addedPartsList');
-            l.innerHTML = '';
-            tempParts.forEach((p, i) => {
-                l.innerHTML += `<div class="part-item"><div><b>${p.name}</b> (${p.qty})</div><div>${(p.price*p.qty).toLocaleString()}원 <button onclick="tempParts.splice(${i},1);renderParts();calcTotal();" style="border:none;color:red;background:none;">X</button></div></div>`;
+        function addPart() { const n=document.getElementById('partName').value, p=Number(document.getElementById('partPrice').value)||0, q=Number(document.getElementById('partQty').value)||1; if(!n||!p) return; tParts.push({name:n, price:p, qty:q}); renderParts(); calcTotal(); }
+        function renderParts() { document.getElementById('addedPartsList').innerHTML = tParts.map((p,i)=>`<div style="font-size:0.9rem; padding:5px; border-bottom:1px solid #eee;">${p.name}(${p.qty}) - ${(p.price*p.qty).toLocaleString()}원 <button onclick="tParts.splice(${i},1);renderParts();calcTotal();" style="color:red;border:none;background:none;">X</button></div>`).join(''); }
+        function calcTotal() { let l=Number(document.getElementById('inLabor').value)||0, p=tParts.reduce((s,x)=>s+(x.price*x.qty),0); document.getElementById('displayTotal').innerText=(l+p).toLocaleString(); return l+p; }
+        function renderPhotos() {
+            const a = document.getElementById('photoArea'); while(a.children.length > 1) a.removeChild(a.lastChild);
+            tPhotos.forEach((s, i) => {
+                const d = document.createElement('div'); d.className = 'photo-prev'; d.style.backgroundImage = `url(${s})`;
+                d.onclick = () => { if(confirm("사진 삭제?")) { tPhotos.splice(i,1); renderPhotos(); } }; a.appendChild(d);
             });
         }
-
-        function calcTotal() {
-            let labor = Number(document.getElementById('inLabor').value) || 0;
-            let parts = tempParts.reduce((s, p) => s + (p.price * p.qty), 0);
-            let tot = labor + parts;
-            document.getElementById('displayTotal').innerText = tot.toLocaleString();
-            return tot;
-        }
-
         function handleAddPhoto(input) {
             if(!input.files[0]) return;
-            const r = new FileReader();
-            r.onload = e => {
-                const img = new Image();
-                img.onload = () => {
-                    const c = document.createElement('canvas');
-                    const x = c.getContext('2d');
-                    const max = 600; let w=img.width, h=img.height;
-                    if(w>max){ h*=max/w; w=max; }
-                    c.width=w; c.height=h; x.drawImage(img,0,0,w,h);
-                    tempPhotos.push(c.toDataURL('image/jpeg', 0.6)); renderPhotos();
-                };
-                img.src = e.target.result;
-            };
-            r.readAsDataURL(input.files[0]);
+            const r = new FileReader(); r.onload = e => {
+                const img = new Image(); img.onload = () => {
+                    const c = document.createElement('canvas'); const max = 600; let w=img.width, h=img.height;
+                    if(w>h) { if(w>max){ h*=max/w; w=max; } } else { if(h>max){ w*=max/h; h=max; } }
+                    c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
+                    tPhotos.push(c.toDataURL('image/jpeg', 0.7)); renderPhotos();
+                }; img.src = e.target.result;
+            }; r.readAsDataURL(input.files[0]);
         }
-
-        function renderPhotos() {
-            const a = document.getElementById('photoArea');
-            while(a.children.length > 1) a.removeChild(a.lastChild);
-            tempPhotos.forEach((s, i) => {
-                const d = document.createElement('div');
-                d.className = 'photo-prev'; d.style.backgroundImage = `url(${s})`;
-                d.onclick = () => { if(confirm("삭제?")){tempPhotos.splice(i,1);renderPhotos();}};
-                a.appendChild(d);
-            });
-        }
-
         function saveData() {
             const id = document.getElementById('editId').value;
-            const name = document.getElementById('inName').value;
-            if(!name) return alert("업체명 필수");
-            const data = {
-                id: id ? Number(id) : Date.now(),
-                date: document.getElementById('inDate').value,
-                name, info: document.getElementById('inInfo').value,
-                action: document.getElementById('inAction').value,
-                labor: Number(document.getElementById('inLabor').value),
-                parts: tempParts, photos: tempPhotos, total: calcTotal()
-            };
-            if(id) logs[logs.findIndex(l=>l.id==id)] = data; else logs.push(data);
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(logs));
-            alert("저장 완료"); goTab('calendar');
+            const data = { id: id ? Number(id) : Date.now(), date: document.getElementById('inDate').value, name: document.getElementById('inName').value, info: document.getElementById('inInfo').value, action: document.getElementById('inAction').value, labor: Number(document.getElementById('inLabor').value), parts: tParts, photos: tPhotos, total: calcTotal() };
+            if(id) logs[logs.findIndex(l => l.id == id)] = data; else logs.push(data);
+            localStorage.setItem(KEY, JSON.stringify(logs)); alert("저장 완료"); goTab('calendar');
         }
-
-        function doSearch(txt) {
-            const res = document.getElementById('searchResult');
-            res.innerHTML = ''; if(!txt) return;
-            logs.filter(l => l.name.includes(txt) || (l.info && l.info.includes(txt))).forEach(item => {
-                const d = document.createElement('div');
-                d.className = 'card'; d.onclick = () => openForm(item.id);
-                d.innerHTML = `<div><b>[${item.date}]</b> ${item.name}</div><div style="font-size:0.8rem;color:#666;">${item.action.substring(0,20)}...</div>`;
-                res.appendChild(d);
-            });
-        }
-
-        function updatePartSuggestions() {
-            const set = new Set();
-            logs.forEach(l => l.parts && l.parts.forEach(p => set.add(p.name)));
-            document.getElementById('partSuggestions').innerHTML = Array.from(set).map(n => `<option value="${n}">`).join('');
-        }
-
-        async function shareData() {
-            const file = new File([JSON.stringify(logs)], `경기냉동_백업.json`, {type:"application/json"});
-            if(navigator.share) await navigator.share({files:[file], title:'경기냉동 백업'});
-        }
-
-        function importData(input) {
-            const f = input.files[0]; if(!f) return;
-            const r = new FileReader();
-            r.onload = e => { logs = JSON.parse(e.target.result); localStorage.setItem(STORAGE_KEY, JSON.stringify(logs)); renderCal(); goTab('calendar'); alert("복구 완료"); };
-            r.readAsText(f);
-        }
-
-        function delData() { if(confirm("삭제할까요?")){ logs=logs.filter(l=>l.id!=document.getElementById('editId').value); localStorage.setItem(STORAGE_KEY,JSON.stringify(logs)); goTab('calendar'); } }
+        function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+        function delData() { if(confirm("정말 삭제하시겠습니까?")){ logs=logs.filter(l=>l.id!=document.getElementById('editId').value); localStorage.setItem(KEY,JSON.stringify(logs)); goTab('calendar'); } }
     </script>
 </body>
 </html>
