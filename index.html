@@ -27,15 +27,20 @@
         .m-btn { padding: 8px 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
         .m-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
 
+        /* 리스트 스타일 */
         .list-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 5px solid #ccc; }
+        
+        /* 장부 요약 스타일 */
         .income-summary { background: #002d5d; color: white; border-radius: 15px; padding: 20px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
-        .summary-row.total { border: none; font-weight: bold; font-size: 1.2rem; color: var(--accent); margin-top: 5px; }
+        .summary-row.total-label { border: none; font-weight: bold; font-size: 1.1rem; color: var(--accent); margin-top: 10px; }
 
+        /* 사진 및 폼 스타일 */
         .photo-area { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
         .photo-prev { width: 80px; height: 80px; background-size: cover; background-position: center; border-radius: 8px; border: 1px solid #ddd; flex-shrink: 0; cursor: pointer; position: relative; }
         .photo-prev::after { content: '✕'; position: absolute; top: -5px; right: -5px; background: red; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
         
+        label { display: block; margin: 15px 0 5px; font-weight: bold; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; margin-bottom: 5px; font-size: 1rem; }
         .btn-main { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; color: white; margin-top: 12px; font-size: 1.1rem; cursor: pointer; }
         .bg-blue { background: var(--primary); }
@@ -50,6 +55,9 @@
         
         #detailModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
         .detail-card { background: #f9f9f9; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
+        .detail-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
+        .detail-table th, .detail-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .detail-table th { background: #f2f2f2; }
     </style>
 </head>
 <body>
@@ -69,9 +77,17 @@
         <h3 style="margin:0 0 10px 0;">📅 월별 장부 선택</h3>
         <div class="month-selector" id="monthButtons"></div>
         <div id="customerList"></div>
+        
         <div class="income-summary">
-            <div class="summary-row"><span id="monthSumTitle">2월 수입 합계</span><span id="monthTotal">0원</span></div>
-            <div class="summary-row total"><span>연간 수입 합계</span><span id="yearTotal">0원</span></div>
+            <div class="summary-row"><span id="mLaborTitle">0월 공임비 합계</span><span id="mLaborSum">0원</span></div>
+            <div class="summary-row"><span id="mBuyTitle">0월 부품비 합계</span><span id="mBuySum">0원</span></div>
+            
+            <div class="summary-row total-label" style="margin-top:15px;">
+                <span id="yLaborTitle">2026년 공임비 총합</span><span id="yLaborSum">0원</span>
+            </div>
+            <div class="summary-row total-label">
+                <span id="yBuyTitle">2026년 부품비 총합</span><span id="yBuySum">0원</span>
+            </div>
         </div>
     </div>
 
@@ -79,24 +95,32 @@
         <input type="hidden" id="editId">
         <label>📅 날짜</label><input type="date" id="inDate">
         <label>🏢 업체명</label><input type="text" id="inName">
-        <label>📞 연락처/주소</label><input type="text" id="inInfo">
+        <label>📞 연락처/주소</label><input type="text" id="inInfo" oninput="formatPhone(this)" placeholder="010-0000-0000">
         <label>📝 작업내용</label><textarea id="inAction" rows="3"></textarea>
         
         <label>🔧 부품 추가</label>
         <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd;">
             <input type="text" id="partName" placeholder="부품명">
             <div style="display:flex; gap:5px;">
-                <input type="number" id="partPrice" placeholder="판매가">
+                <input type="number" id="partBuyPrice" placeholder="부품구매가격" style="width:100%;">
                 <input type="number" id="partQty" placeholder="수량" style="width:70px;">
             </div>
             <button class="btn-main bg-gray" onclick="addPart()" style="padding:8px; font-size:0.9rem;">+ 부품 추가</button>
         </div>
         <div id="addedPartsList" style="margin-top:10px;"></div>
 
-        <label>💰 공임비</label><input type="number" id="inLabor" value="0" oninput="calcTotal()">
-        <div style="background: #e3f2fd; padding: 15px; border-radius: 8px; text-align: right; font-size: 1.3rem; font-weight: bold; color: #004085; margin-top: 10px;">합계: <span id="displayTotal">0</span>원</div>
+        <label>💰 공임비</label><input type="number" id="inLabor" value="0" oninput="updateCounters()">
         
-        <label>📷 사진 (클릭하여 삭제)</label>
+        <div style="margin-top:20px; padding:10px; background:#fff; border-radius:10px; border:1px solid #eee;">
+            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.9rem;">
+                <span>공임비 내역:</span><span id="countLabor">0원</span>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
+                <span>부품구매가 내역:</span><span id="countParts">0원</span>
+            </div>
+        </div>
+        
+        <label>📷 사진 (클릭 삭제)</label>
         <div class="photo-area" id="photoArea">
             <label style="width:80px; height:80px; border:2px dashed #ccc; display:flex; justify-content:center; align-items:center; border-radius:8px; color:#aaa; font-size:24px; cursor:pointer;">+<input type="file" accept="image/*" style="display:none;" onchange="handleAddPhoto(this)"></label>
         </div>
@@ -108,8 +132,12 @@
     <div id="viewSettings" class="view-container">
         <div style="background:white; padding:20px; border-radius:12px; text-align:center;">
             <h3>📊 엑셀 파일 백업</h3>
-            <button class="btn-main bg-green" onclick="downloadCSV()">작업일지 엑셀 다운로드(.csv)</button>
-            <p style="font-size:0.8rem; color:#888; margin-top:10px;">데이터 겹침 방지 및 연속 다운로드 오류가 수정되었습니다.</p>
+            <button class="btn-main bg-green" onclick="downloadCSV()">작업일지 다운로드(.csv)</button>
+        </div>
+        <div style="background:white; padding:20px; border-radius:12px; text-align:center; margin-top:20px; border:2px dashed #ccc;">
+            <h3>📥 엑셀 파일 불러오기</h3>
+            <input type="file" id="uploadExcel" accept=".csv" style="display:none" onchange="uploadCSV(this)">
+            <button class="btn-main bg-gray" onclick="document.getElementById('uploadExcel').click()">가져오기</button>
         </div>
     </div>
 
@@ -122,9 +150,8 @@
     </div>
 
     <footer>
-        <b>경기냉동</b><br>
-        대표: 송기천 | 010-5422-6705<br>
-        경기도 고양시 일산서구 덕산로 312번길 15, 103호
+        <b>경기냉동</b> | 대표: 송기천<br>
+        010-5422-6705
     </footer>
 
     <div class="bottom-nav">
@@ -135,7 +162,7 @@
     </div>
 
     <script>
-        const KEY = 'ggFreezerLogs';
+        const KEY = 'ggFreezerLogs_V2'; // 로직 변경에 따른 키 분리
         let logs = JSON.parse(localStorage.getItem(KEY)) || [];
         let curYear, curMonth, selDate, ledgerMonth;
         let tParts = [], tPhotos = [];
@@ -146,88 +173,87 @@
             createMonthButtons(); renderCal(); renderList(selDate);
         };
 
-        // --- 엑셀(CSV) 다운로드: 연속 다운로드 버그 수선 및 데이터 격리 --- [cite: 2026-02-16]
-        function downloadCSV() {
-            if(logs.length === 0) return alert("데이터 없음");
-            let csv = "\uFEFF"; // 한글 깨짐 방지 BOM
-            csv += "날짜,업체명,연락처/주소,작업내용,공임비,부품내역,총합계\n";
-            
-            logs.sort((a,b)=>b.date.localeCompare(a.date)).forEach(l => {
-                const parts = l.parts ? l.parts.map(p => `${p.name}(${p.qty})`).join('; ') : "";
-                // 데이터를 따옴표로 감싸서 엑셀 열 겹침 방지 강화
-                const cleanName = `"${l.name.replace(/"/g, '""')}"`;
-                const cleanInfo = `"${(l.info || "").replace(/"/g, '""')}"`;
-                const cleanAction = `"${l.action.replace(/"/g, '""').replace(/\n/g, ' ')}"`;
-                
-                csv += `${l.date},${cleanName},${cleanInfo},${cleanAction},${l.labor},"${parts}",${l.total}\n`;
-            });
-
-            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = url;
-            link.download = `경기냉동_일지_${new Date().toISOString().slice(0,10)}.csv`;
-            document.body.appendChild(link);
-            link.click();
-            
-            // 연속 다운로드가 안 되는 문제 수선: 메모리 해제 및 링크 삭제 [cite: 2026-02-16]
-            setTimeout(() => {
-                document.body.removeChild(link);
-                window.URL.revokeObjectURL(url);
-            }, 100);
+        function formatPhone(el) {
+            let v = el.value.replace(/[^0-9]/g, ""); if (v.length < 3) v = "010";
+            let r = "010-"; if (v.length > 3) {
+                let n = v.substring(3); if (n.length > 4) r += n.substring(0, 4) + "-" + n.substring(4, 8); else r += n;
+            } el.value = r;
         }
 
-        // --- 나머지 로직 (수정 없이 그대로 유지) --- [cite: 2026-02-16]
-        function createMonthButtons() {
-            const container = document.getElementById('monthButtons'); container.innerHTML = '';
-            for(let i=0; i<12; i++) {
-                const btn = document.createElement('button'); btn.className = `m-btn ${i === ledgerMonth ? 'active' : ''}`;
-                btn.innerText = `${i+1}월`; btn.onclick = () => { ledgerMonth = i; createMonthButtons(); renderLedger(); };
-                container.appendChild(btn);
-            }
-        }
+        // --- 장부 정산: 완전 분리 합산 로직 ---
         function renderLedger() {
             const listDiv = document.getElementById('customerList'); listDiv.innerHTML = '';
             const mStr = `${curYear}-${String(ledgerMonth+1).padStart(2,'0')}`;
-            const monthLogs = logs.filter(l => l.date.startsWith(mStr));
-            const customers = [...new Set(monthLogs.map(l => l.name))].sort();
-            customers.forEach(name => {
+            const mLogs = logs.filter(l => l.date.startsWith(mStr));
+            const yLogs = logs.filter(l => l.date.startsWith(`${curYear}`));
+
+            [...new Set(mLogs.map(l => l.name))].sort().forEach(n => {
                 const item = document.createElement('div'); item.className = 'list-item';
-                item.innerHTML = `<span>${name}</span><span>상세보기 ▶</span>`;
-                item.onclick = () => showDetail(name, mStr);
-                listDiv.appendChild(item);
+                item.innerHTML = `<span>${n}</span><span>정산보기 ▶</span>`;
+                item.onclick = () => showDetail(n, mStr); listDiv.appendChild(item);
             });
-            document.getElementById('monthSumTitle').innerText = `${ledgerMonth+1}월 수입 합계`;
-            document.getElementById('monthTotal').innerText = monthLogs.reduce((s,l)=>s+(Number(l.total)||0),0).toLocaleString() + "원";
-            document.getElementById('yearTotal').innerText = logs.filter(l => l.date.startsWith(`${curYear}`)).reduce((s,l)=>s+(Number(l.total)||0),0).toLocaleString() + "원";
+
+            const getSums = (arr) => {
+                let lSum = 0, pSum = 0;
+                arr.forEach(log => {
+                    lSum += (Number(log.labor) || 0);
+                    if(log.parts) log.parts.forEach(p => pSum += (Number(p.buyPrice) * p.qty));
+                });
+                return { lSum, pSum };
+            };
+
+            const mS = getSums(mLogs); const yS = getSums(yLogs);
+
+            document.getElementById('mLaborTitle').innerText = `${ledgerMonth+1}월 공임비 합계`;
+            document.getElementById('mLaborSum').innerText = mS.lSum.toLocaleString() + "원";
+            document.getElementById('mBuyTitle').innerText = `${ledgerMonth+1}월 부품비 합계`;
+            document.getElementById('mBuySum').innerText = mS.pSum.toLocaleString() + "원";
+            
+            document.getElementById('yLaborTitle').innerText = `${curYear}년 공임비 총합`;
+            document.getElementById('yLaborSum').innerText = yS.lSum.toLocaleString() + "원";
+            document.getElementById('yBuyTitle').innerText = `${curYear}년 부품비 총합`;
+            document.getElementById('yBuySum').innerText = yS.pSum.toLocaleString() + "원";
         }
+
         function showDetail(name, mStr) {
             const det = document.getElementById('customerDetails'); det.innerHTML = '';
-            document.getElementById('modalTitle').innerText = name + " 상세 기록";
+            document.getElementById('modalTitle').innerText = name + " 정산 상세";
             logs.filter(l => l.name === name && l.date.startsWith(mStr)).sort((a,b)=>b.date.localeCompare(a.date)).forEach(log => {
-                det.innerHTML += `<div class="detail-card"><b>${log.date}</b> | 합계: ${(Number(log.total)).toLocaleString()}원<br>${log.action}</div>`;
+                let pTable = '';
+                if(log.parts && log.parts.length > 0) {
+                    pTable = `<table class="detail-table"><tr><th>부품명</th><th>수량</th><th>구매가</th></tr>`;
+                    log.parts.forEach(p => pTable += `<tr><td>${p.name}</td><td>${p.qty}</td><td>${(Number(p.buyPrice)).toLocaleString()}원</td></tr>`);
+                    pTable += `</table>`;
+                }
+                det.innerHTML += `<div class="detail-card"><b>날짜: ${log.date}</b><br>공임비: ${(Number(log.labor)).toLocaleString()}원<br>${pTable}</div>`;
             });
             document.getElementById('detailModal').style.display = 'block';
         }
+
+        // --- 기존 로직 유지 --- [cite: 2026-02-16]
+        function createMonthButtons() {
+            const c = document.getElementById('monthButtons'); c.innerHTML = '';
+            for(let i=0; i<12; i++) {
+                const b = document.createElement('button'); b.className = `m-btn ${i===ledgerMonth?'active':''}`;
+                b.innerText = `${i+1}월`; b.onclick = () => { ledgerMonth=i; createMonthButtons(); renderLedger(); }; c.appendChild(b);
+            }
+        }
         function renderCal() {
             document.getElementById('currentMonthStr').innerText = `${curYear}년 ${curMonth+1}월`;
-            const grid = document.getElementById('calendarGrid');
-            grid.innerHTML = '<div style="color:red">일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div style="color:blue">토</div>';
-            const first = new Date(curYear, curMonth, 1).getDay();
-            const last = new Date(curYear, curMonth+1, 0).getDate();
-            for(let i=0; i<first; i++) grid.innerHTML += '<div></div>';
-            for(let d=1; d<=last; d++) {
+            const g = document.getElementById('calendarGrid'); g.innerHTML = '<div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>';
+            const f = new Date(curYear, curMonth, 1).getDay(); const l = new Date(curYear, curMonth+1, 0).getDate();
+            for(let i=0; i<f; i++) g.innerHTML += '<div></div>';
+            for(let d=1; d<=l; d++) {
                 const ymd = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
                 const cnt = logs.filter(l => l.date === ymd).length;
-                grid.innerHTML += `<div class="day-cell ${ymd===new Date().toISOString().split('T')[0]?'today':''} ${ymd===selDate?'selected':''}" onclick="selectDate('${ymd}')"><b>${d}</b><div class="badge ${cnt>0?'show':''}">${cnt}</div></div>`;
+                g.innerHTML += `<div class="day-cell ${ymd===new Date().toISOString().split('T')[0]?'today':''} ${ymd===selDate?'selected':''}" onclick="selectDate('${ymd}')"><b>${d}</b><div class="badge ${cnt>0?'show':''}">${cnt}</div></div>`;
             }
         }
         function renderList(ymd) {
             const list = document.getElementById('dailyList'); list.innerHTML = '';
             logs.filter(l => l.date === ymd).forEach(item => {
                 const d = document.createElement('div'); d.className = 'list-item';
-                d.onclick = () => openForm(item.id); d.innerHTML = `<span>${item.name}</span><span>${(Number(item.total)).toLocaleString()}원 ▶</span>`;
-                list.appendChild(d);
+                d.onclick = () => openForm(item.id); d.innerHTML = `<span>${item.name}</span><span>기록보기 ▶</span>`; list.appendChild(d);
             });
         }
         function selectDate(ymd) { selDate = ymd; renderCal(); renderList(ymd); }
@@ -238,8 +264,7 @@
             const idx = {calendar:0, ledger:1, form:2, settings:3}[t];
             document.querySelectorAll('.nav-btn')[idx].classList.add('active');
             document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active-view');
-            if(t==='ledger') { ledgerMonth = curMonth; createMonthButtons(); renderLedger(); }
-            if(t==='calendar') renderCal();
+            if(t==='ledger') renderLedger(); if(t==='calendar') renderCal();
         }
         function openForm(id = null) {
             goTab('form'); tParts = []; tPhotos = [];
@@ -251,20 +276,61 @@
                 tParts = item.parts || []; tPhotos = item.photos || []; document.getElementById('btnDel').style.display = 'block';
             } else {
                 document.getElementById('editId').value = ''; document.getElementById('inDate').value = selDate;
-                document.getElementById('inName').value = ''; document.getElementById('inInfo').value = '';
+                document.getElementById('inName').value = ''; document.getElementById('inInfo').value = '010-';
                 document.getElementById('inAction').value = ''; document.getElementById('inLabor').value = 0;
                 document.getElementById('btnDel').style.display = 'none';
             }
-            renderParts(); renderPhotos(); calcTotal();
+            renderParts(); renderPhotos(); updateCounters();
         }
-        function addPart() { const n=document.getElementById('partName').value, p=Number(document.getElementById('partPrice').value)||0, q=Number(document.getElementById('partQty').value)||1; if(!n||!p) return; tParts.push({name:n, price:p, qty:q}); renderParts(); calcTotal(); }
-        function renderParts() { document.getElementById('addedPartsList').innerHTML = tParts.map((p,i)=>`<div style="font-size:0.9rem; padding:5px; border-bottom:1px solid #eee;">${p.name}(${p.qty}) - ${(p.price*p.qty).toLocaleString()}원 <button onclick="tParts.splice(${i},1);renderParts();calcTotal();" style="color:red;border:none;background:none;">X</button></div>`).join(''); }
-        function calcTotal() { let l=Number(document.getElementById('inLabor').value)||0, p=tParts.reduce((s,x)=>s+(x.price*x.qty),0); document.getElementById('displayTotal').innerText=(l+p).toLocaleString(); return l+p; }
+        function addPart() { 
+            const n=document.getElementById('partName').value, bp=Number(document.getElementById('partBuyPrice').value)||0, q=Number(document.getElementById('partQty').value)||1;
+            if(!n||!bp) return; tParts.push({name:n, buyPrice:bp, qty:q}); 
+            document.getElementById('partName').value=''; document.getElementById('partBuyPrice').value=''; document.getElementById('partQty').value='';
+            renderParts(); updateCounters();
+        }
+        function renderParts() { document.getElementById('addedPartsList').innerHTML = tParts.map((p,i)=>`<div style="font-size:0.85rem; padding:4px; border-bottom:1px solid #eee;">${p.name}(${p.qty}) - 구매가:${(p.buyPrice*p.qty).toLocaleString()}원 <button onclick="tParts.splice(${i},1);renderParts();updateCounters();" style="color:red;border:none;background:none;">X</button></div>`).join(''); }
+        function updateCounters() {
+            const l = Number(document.getElementById('inLabor').value) || 0;
+            const p = tParts.reduce((s, x) => s + (x.buyPrice * x.qty), 0);
+            document.getElementById('countLabor').innerText = l.toLocaleString() + "원";
+            document.getElementById('countParts').innerText = p.toLocaleString() + "원";
+        }
+        function saveData() {
+            const name = document.getElementById('inName').value; if(!name) return;
+            const data = { id: document.getElementById('editId').value ? Number(document.getElementById('editId').value) : Date.now(), date: document.getElementById('inDate').value, name, info: document.getElementById('inInfo').value, action: document.getElementById('inAction').value, labor: Number(document.getElementById('inLabor').value), parts: tParts, photos: tPhotos };
+            const idx = logs.findIndex(l => l.id == data.id);
+            if(idx > -1) logs[idx] = data; else logs.push(data);
+            localStorage.setItem(KEY, JSON.stringify(logs)); alert("저장 완료"); goTab('calendar');
+        }
+        function downloadCSV() {
+            let csv = "\uFEFF날짜,업체명,연락처,작업내용,공임비,부품구매가합산\n";
+            logs.sort((a,b)=>b.date.localeCompare(a.date)).forEach(l => {
+                const bSum = l.parts ? l.parts.reduce((s, p) => s + (p.buyPrice * p.qty), 0) : 0;
+                csv += `${l.date},"${l.name}","${l.info||""}","${l.action.replace(/"/g,'""')}",${l.labor},${bSum}\n`;
+            });
+            const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
+            link.download = `경기냉동_정산_${new Date().toISOString().slice(0,10)}.csv`; link.click();
+        }
+        function uploadCSV(input) {
+            const f = input.files[0]; if (!f) return;
+            const r = new FileReader(); r.onload = (e) => {
+                let t = e.target.result; if (t.startsWith('\uFEFF')) t = t.substring(1);
+                const rows = t.split('\n').filter(row => row.trim() !== ""); const nl = [];
+                for (let i = 1; i < rows.length; i++) {
+                    const c = rows[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                    if (c && c.length >= 6) {
+                        const rd = c.map(col => col.replace(/^"|"$/g, '').trim());
+                        nl.push({ id: Date.now() + i, date: rd[0], name: rd[1], info: rd[2], action: rd[3], labor: Number(rd[4]), parts: [{name:"불러온데이터", buyPrice: Number(rd[5]), qty: 1}], photos: [] });
+                    }
+                }
+                logs = [...logs, ...nl]; localStorage.setItem(KEY, JSON.stringify(logs)); location.reload();
+            }; r.readAsText(f);
+        }
         function renderPhotos() {
             const a = document.getElementById('photoArea'); while(a.children.length > 1) a.removeChild(a.lastChild);
             tPhotos.forEach((s, i) => {
                 const d = document.createElement('div'); d.className = 'photo-prev'; d.style.backgroundImage = `url(${s})`;
-                d.onclick = () => { if(confirm("사진 삭제?")) { tPhotos.splice(i,1); renderPhotos(); } }; a.appendChild(d);
+                d.onclick = () => { if(confirm("삭제?")) { tPhotos.splice(i,1); renderPhotos(); } }; a.appendChild(d);
             });
         }
         function handleAddPhoto(input) {
@@ -278,14 +344,8 @@
                 }; img.src = e.target.result;
             }; r.readAsDataURL(input.files[0]);
         }
-        function saveData() {
-            const id = document.getElementById('editId').value;
-            const data = { id: id ? Number(id) : Date.now(), date: document.getElementById('inDate').value, name: document.getElementById('inName').value, info: document.getElementById('inInfo').value, action: document.getElementById('inAction').value, labor: Number(document.getElementById('inLabor').value), parts: tParts, photos: tPhotos, total: calcTotal() };
-            if(id) logs[logs.findIndex(l => l.id == id)] = data; else logs.push(data);
-            localStorage.setItem(KEY, JSON.stringify(logs)); alert("저장 완료"); goTab('calendar');
-        }
         function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
-        function delData() { if(confirm("정말 삭제하시겠습니까?")){ logs=logs.filter(l=>l.id!=document.getElementById('editId').value); localStorage.setItem(KEY,JSON.stringify(logs)); goTab('calendar'); } }
+        function delData() { if(confirm("삭제?")){ logs=logs.filter(l=>l.id!=document.getElementById('editId').value); localStorage.setItem(KEY,JSON.stringify(logs)); goTab('calendar'); } }
     </script>
 </body>
 </html>
