@@ -12,8 +12,6 @@
         header { background: var(--primary); color: white; padding: 15px; font-weight: bold; text-align: center; font-size: 1.5rem; position: sticky; top: 0; z-index: 100; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
         .view-container { display: none; padding: 15px; }
         .active-view { display: block; }
-        
-        /* 달력 스타일 */
         .cal-header { display: flex; justify-content: space-between; align-items: center; background: white; padding: 15px; border-radius: 12px; margin-bottom: 15px; font-weight: bold; }
         .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; background: white; padding: 10px; border-radius: 12px; text-align: center; }
         .day-cell { height: 60px; border: 1px solid #f0f0f0; border-radius: 8px; position: relative; display: flex; flex-direction: column; padding: 4px; font-size: 0.9rem; cursor: pointer; }
@@ -21,331 +19,143 @@
         .day-cell.selected { background: var(--primary) !important; color: white !important; border: 2px solid var(--accent) !important; }
         .badge { position: absolute; bottom: 3px; right: 3px; background: #dc3545; color: white; font-size: 0.7rem; padding: 2px 6px; border-radius: 10px; display: none; }
         .badge.show { display: block; }
-
-        /* 월 선택 버튼 */
         .month-selector { display: flex; flex-wrap: wrap; gap: 5px; margin-bottom: 15px; background: white; padding: 10px; border-radius: 12px; justify-content: center; }
         .m-btn { padding: 8px 12px; border: 1px solid var(--border); background: white; border-radius: 8px; font-size: 0.85rem; cursor: pointer; }
         .m-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
-
-        /* 리스트 스타일 */
         .list-item { background: white; border-radius: 12px; padding: 15px; margin-bottom: 8px; box-shadow: 0 2px 5px rgba(0,0,0,0.05); display: flex; justify-content: space-between; align-items: center; cursor: pointer; border-left: 5px solid #ccc; }
-        
-        /* 장부 요약 스타일 */
         .income-summary { background: #002d5d; color: white; border-radius: 15px; padding: 20px; margin-top: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .summary-row { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 1rem; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 8px; }
         .summary-row.total-label { border: none; font-weight: bold; font-size: 1.1rem; color: var(--accent); margin-top: 10px; }
-
-        /* 사진 및 폼 스타일 */
-        .photo-area { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
-        .photo-prev { width: 80px; height: 80px; background-size: cover; background-position: center; border-radius: 8px; border: 1px solid #ddd; flex-shrink: 0; cursor: pointer; position: relative; }
-        .photo-prev::after { content: '✕'; position: absolute; top: -5px; right: -5px; background: red; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
-        
-        label { display: block; margin: 15px 0 5px; font-weight: bold; }
         input, textarea { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; margin-bottom: 5px; font-size: 1rem; }
         .btn-main { width: 100%; padding: 16px; border: none; border-radius: 10px; font-weight: bold; color: white; margin-top: 12px; font-size: 1.1rem; cursor: pointer; }
         .bg-blue { background: var(--primary); }
         .bg-green { background: #28a745; }
         .bg-gray { background: #6c757d; }
         .bg-red { background: #c82333; }
-
-        footer { text-align: center; padding: 20px 10px; color: #888; font-size: 0.8rem; border-top: 1px solid #eee; margin-top: 30px; line-height: 1.6; }
+        .photo-area { display: flex; gap: 10px; overflow-x: auto; padding: 10px 0; }
+        .photo-prev { width: 80px; height: 80px; background-size: cover; background-position: center; border-radius: 8px; border: 1px solid #ddd; flex-shrink: 0; cursor: pointer; position: relative; }
+        .photo-prev::after { content: '✕'; position: absolute; top: -5px; right: -5px; background: red; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
+        footer { text-align: center; padding: 20px 10px; color: #888; font-size: 0.8rem; border-top: 1px solid #eee; margin-top: 30px; }
         .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; padding: 10px 5px; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
         .nav-btn { flex: 1; text-align: center; color: #999; font-size: 0.75rem; font-weight: bold; cursor: pointer; background: none; border: none; }
         .nav-btn.active { color: var(--primary); }
-        
         #detailModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
         .detail-card { background: #f9f9f9; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
         .detail-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
         .detail-table th, .detail-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        .detail-table th { background: #f2f2f2; }
     </style>
 </head>
 <body>
     <header>경기냉동</header>
-
     <div id="viewCalendar" class="view-container active-view">
-        <div class="cal-header">
-            <button onclick="changeMonth(-1)">◀</button>
-            <span id="currentMonthStr"></span>
-            <button onclick="changeMonth(1)">▶</button>
-        </div>
+        <div class="cal-header"><button onclick="changeMonth(-1)">◀</button><span id="currentMonthStr"></span><button onclick="changeMonth(1)">▶</button></div>
         <div id="calendarGrid" class="cal-grid"></div>
         <div id="dailyList" style="margin-top:15px;"></div>
     </div>
-
     <div id="viewLedger" class="view-container">
-        <h3 style="margin:0 0 10px 0;">📅 월별 장부 선택</h3>
         <div class="month-selector" id="monthButtons"></div>
         <div id="customerList"></div>
-        
         <div class="income-summary">
             <div class="summary-row"><span id="mLaborTitle">0월 공임비 합계</span><span id="mLaborSum">0원</span></div>
             <div class="summary-row"><span id="mBuyTitle">0월 부품비 합계</span><span id="mBuySum">0원</span></div>
-            
-            <div class="summary-row total-label" style="margin-top:15px;">
-                <span id="yLaborTitle">2026년 공임비 총합</span><span id="yLaborSum">0원</span>
-            </div>
-            <div class="summary-row total-label">
-                <span id="yBuyTitle">2026년 부품비 총합</span><span id="yBuySum">0원</span>
-            </div>
+            <div class="summary-row total-label" style="margin-top:15px;"><span id="yLaborTitle">올해 공임비 총합</span><span id="yLaborSum">0원</span></div>
+            <div class="summary-row total-label"><span id="yBuyTitle">올해 부품비 총합</span><span id="yBuySum">0원</span></div>
         </div>
     </div>
-
     <div id="viewForm" class="view-container">
-        <input type="hidden" id="editId">
-        <label>📅 날짜</label><input type="date" id="inDate">
-        <label>🏢 업체명</label><input type="text" id="inName">
-        <label>📞 연락처/주소</label><input type="text" id="inInfo" oninput="formatPhone(this)" placeholder="010-0000-0000">
-        <label>📝 작업내용</label><textarea id="inAction" rows="3"></textarea>
-        
-        <label>🔧 부품 추가</label>
+        <input type="hidden" id="editId"><label>📅 날짜</label><input type="date" id="inDate"><label>🏢 업체명</label><input type="text" id="inName"><label>📞 연락처</label><input type="text" id="inInfo" oninput="formatPhone(this)" placeholder="010-0000-0000"><label>📝 작업내용</label><textarea id="inAction" rows="3"></textarea>
+        <label>🔧 부품 추가 (금액에 콤마 가능)</label>
         <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd;">
             <input type="text" id="partName" placeholder="부품명">
             <div style="display:flex; gap:5px;">
-                <input type="number" id="partBuyPrice" placeholder="부품구매가격" style="width:100%;">
-                <input type="number" id="partQty" placeholder="수량" style="width:70px;">
+                <input type="text" id="partBuyPrice" placeholder="구매가(예: 1,000)" style="width:100%;" oninput="formatComma(this)">
+                <input type="number" id="partQty" placeholder="수량" style="width:70px;" value="1">
             </div>
             <button class="btn-main bg-gray" onclick="addPart()" style="padding:8px; font-size:0.9rem;">+ 부품 추가</button>
         </div>
         <div id="addedPartsList" style="margin-top:10px;"></div>
-
-        <label>💰 공임비</label><input type="number" id="inLabor" value="0" oninput="updateCounters()">
-        
-        <div style="margin-top:20px; padding:10px; background:#fff; border-radius:10px; border:1px solid #eee;">
-            <div style="display:flex; justify-content:space-between; margin-bottom:5px; font-size:0.9rem;">
-                <span>공임비 내역:</span><span id="countLabor">0원</span>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:0.9rem;">
-                <span>부품구매가 내역:</span><span id="countParts">0원</span>
-            </div>
-        </div>
-        
-        <label>📷 사진 (클릭 삭제)</label>
-        <div class="photo-area" id="photoArea">
-            <label style="width:80px; height:80px; border:2px dashed #ccc; display:flex; justify-content:center; align-items:center; border-radius:8px; color:#aaa; font-size:24px; cursor:pointer;">+<input type="file" accept="image/*" style="display:none;" onchange="handleAddPhoto(this)"></label>
-        </div>
-        
+        <label>💰 공임비 (금액에 콤마 가능)</label>
+        <input type="text" id="inLabor" value="0" oninput="formatComma(this)">
+        <label>📷 사진</label><div class="photo-area" id="photoArea"><label style="width:80px; height:80px; border:2px dashed #ccc; display:flex; justify-content:center; align-items:center; border-radius:8px; color:#aaa; font-size:24px; cursor:pointer;">+<input type="file" accept="image/*" style="display:none;" onchange="handleAddPhoto(this)"></label></div>
         <button class="btn-main bg-blue" onclick="saveData()">저장 완료</button>
-        <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none;">🗑️ 기록 삭제</button>
+        <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none;">🗑️ 기록 삭제하기</button>
     </div>
-
-    <div id="viewSettings" class="view-container">
-        <div style="background:white; padding:20px; border-radius:12px; text-align:center;">
-            <h3>📊 엑셀 파일 백업</h3>
-            <button class="btn-main bg-green" onclick="downloadCSV()">작업일지 다운로드(.csv)</button>
-        </div>
-        <div style="background:white; padding:20px; border-radius:12px; text-align:center; margin-top:20px; border:2px dashed #ccc;">
-            <h3>📥 엑셀 파일 불러오기</h3>
-            <input type="file" id="uploadExcel" accept=".csv" style="display:none" onchange="uploadCSV(this)">
-            <button class="btn-main bg-gray" onclick="document.getElementById('uploadExcel').click()">가져오기</button>
-        </div>
-    </div>
-
+    <div id="viewSettings" class="view-container"><button class="btn-main bg-green" onclick="downloadCSV()">작업일지 다운로드(.csv)</button></div>
     <div id="detailModal">
-        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px; margin-bottom:20px;">
-            <h2 id="modalTitle" style="margin:0;">상세 기록</h2>
-            <button onclick="closeModal()" style="padding:10px; background:var(--primary); color:white; border:none; border-radius:8px;">닫기</button>
-        </div>
+        <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px;"><h2 id="modalTitle" style="margin:0;">정산 상세</h2><button onclick="closeModal()">✕</button></div>
         <div id="customerDetails"></div>
     </div>
-
-    <footer>
-        <b>경기냉동</b> | 대표: 송기천<br>
-        010-5422-6705
-    </footer>
-
-    <div class="bottom-nav">
-        <button class="nav-btn active" onclick="goTab('calendar')">📅<br>달력</button>
-        <button class="nav-btn" onclick="goTab('ledger')">📑<br>장부</button>
-        <button class="nav-btn" onclick="openForm()">✏️<br>등록</button>
-        <button class="nav-btn" onclick="goTab('settings')">⚙️<br>설정</button>
-    </div>
-
+    <footer><b>경기냉동</b> | 대표 송기천</footer>
+    <div class="bottom-nav"><button class="nav-btn active" onclick="goTab('calendar')">📅<br>달력</button><button class="nav-btn" onclick="goTab('ledger')">📑<br>장부</button><button class="nav-btn" onclick="openForm()">✏️<br>등록</button><button class="nav-btn" onclick="goTab('settings')">⚙️<br>설정</button></div>
     <script>
-        const KEY = 'ggFreezerLogs_V2'; // 로직 변경에 따른 키 분리
-        let logs = JSON.parse(localStorage.getItem(KEY)) || [];
-        let curYear, curMonth, selDate, ledgerMonth;
-        let tParts = [], tPhotos = [];
+        const KEY = 'ggFreezerLogs_V2'; let logs = JSON.parse(localStorage.getItem(KEY)) || [];
+        let curYear, curMonth, selDate, ledgerMonth, tParts = [], tPhotos = [];
+        window.onload = () => { const now = new Date(); curYear = now.getFullYear(); curMonth = now.getMonth(); ledgerMonth = curMonth; selDate = new Date(now - now.getTimezoneOffset() * 60000).toISOString().split('T')[0]; createMonthButtons(); renderCal(); renderList(selDate); };
+        
+        // --- 콤마 및 숫자 처리 핵심 로직 ---
+        function toNum(v) { if (!v) return 0; return Number(String(v).replace(/[^0-9]/g, "")) || 0; }
+        function formatComma(el) { let v = el.value.replace(/[^0-9]/g, ""); if(v === "") { el.value = "0"; return; } el.value = Number(v).toLocaleString(); }
+        function formatPhone(el) { let v = el.value.replace(/[^0-9]/g, ""); if (v.length < 3) v = "010"; let r = "010-"; if (v.length > 3) { let n = v.substring(3); if (n.length > 4) r += n.substring(0, 4) + "-" + n.substring(4, 8); else r += n; } el.value = r; }
 
-        window.onload = () => {
-            const now = new Date(); curYear = now.getFullYear(); curMonth = now.getMonth();
-            ledgerMonth = curMonth; selDate = new Date(now - now.getTimezoneOffset() * 60000).toISOString().split('T')[0];
-            createMonthButtons(); renderCal(); renderList(selDate);
-        };
-
-        function formatPhone(el) {
-            let v = el.value.replace(/[^0-9]/g, ""); if (v.length < 3) v = "010";
-            let r = "010-"; if (v.length > 3) {
-                let n = v.substring(3); if (n.length > 4) r += n.substring(0, 4) + "-" + n.substring(4, 8); else r += n;
-            } el.value = r;
-        }
-
-        // --- 장부 정산: 완전 분리 합산 로직 ---
+        function goTab(t) { document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); const idx = {calendar:0, ledger:1, form:2, settings:3}[t]; document.querySelectorAll('.nav-btn')[idx].classList.add('active'); document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active-view'); if(t==='ledger') renderLedger(); if(t==='calendar') renderCal(); }
         function renderLedger() {
-            const listDiv = document.getElementById('customerList'); listDiv.innerHTML = '';
-            const mStr = `${curYear}-${String(ledgerMonth+1).padStart(2,'0')}`;
-            const mLogs = logs.filter(l => l.date.startsWith(mStr));
-            const yLogs = logs.filter(l => l.date.startsWith(`${curYear}`));
-
-            [...new Set(mLogs.map(l => l.name))].sort().forEach(n => {
-                const item = document.createElement('div'); item.className = 'list-item';
-                item.innerHTML = `<span>${n}</span><span>정산보기 ▶</span>`;
-                item.onclick = () => showDetail(n, mStr); listDiv.appendChild(item);
-            });
-
-            const getSums = (arr) => {
-                let lSum = 0, pSum = 0;
-                arr.forEach(log => {
-                    lSum += (Number(log.labor) || 0);
-                    if(log.parts) log.parts.forEach(p => pSum += (Number(p.buyPrice) * p.qty));
-                });
-                return { lSum, pSum };
-            };
-
-            const mS = getSums(mLogs); const yS = getSums(yLogs);
-
-            document.getElementById('mLaborTitle').innerText = `${ledgerMonth+1}월 공임비 합계`;
-            document.getElementById('mLaborSum').innerText = mS.lSum.toLocaleString() + "원";
-            document.getElementById('mBuyTitle').innerText = `${ledgerMonth+1}월 부품비 합계`;
-            document.getElementById('mBuySum').innerText = mS.pSum.toLocaleString() + "원";
-            
-            document.getElementById('yLaborTitle').innerText = `${curYear}년 공임비 총합`;
-            document.getElementById('yLaborSum').innerText = yS.lSum.toLocaleString() + "원";
-            document.getElementById('yBuyTitle').innerText = `${curYear}년 부품비 총합`;
-            document.getElementById('yBuySum').innerText = yS.pSum.toLocaleString() + "원";
+            const listDiv = document.getElementById('customerList'); listDiv.innerHTML = ''; const mStr = `${curYear}-${String(ledgerMonth+1).padStart(2,'0')}`;
+            const mLogs = logs.filter(l => l.date.startsWith(mStr)); const yLogs = logs.filter(l => l.date.startsWith(`${curYear}`));
+            [...new Set(mLogs.map(l => l.name))].sort().forEach(n => { const item = document.createElement('div'); item.className = 'list-item'; item.innerHTML = `<span>${n}</span><span>정산보기 ▶</span>`; item.onclick = () => showDetail(n, mStr); listDiv.appendChild(item); });
+            let lTotal = 0, pTotal = 0, yLTotal = 0, yPTotal = 0;
+            mLogs.forEach(log => { lTotal += toNum(log.labor); if(log.parts) log.parts.forEach(p => pTotal += (toNum(p.buyPrice || p.price) * (toNum(p.qty) || 1))); });
+            yLogs.forEach(log => { yLTotal += toNum(log.labor); if(log.parts) log.parts.forEach(p => yPTotal += (toNum(p.buyPrice || p.price) * (toNum(p.qty) || 1))); });
+            document.getElementById('mLaborTitle').innerText = `${ledgerMonth+1}월 공임비 합계`; document.getElementById('mLaborSum').innerText = lTotal.toLocaleString() + "원";
+            document.getElementById('mBuyTitle').innerText = `${ledgerMonth+1}월 부품비 합계`; document.getElementById('mBuySum').innerText = pTotal.toLocaleString() + "원";
+            document.getElementById('yLaborSum').innerText = yLTotal.toLocaleString() + "원"; document.getElementById('yBuySum').innerText = yPTotal.toLocaleString() + "원";
         }
-
         function showDetail(name, mStr) {
-            const det = document.getElementById('customerDetails'); det.innerHTML = '';
-            document.getElementById('modalTitle').innerText = name + " 정산 상세";
+            const det = document.getElementById('customerDetails'); det.innerHTML = ''; document.getElementById('modalTitle').innerText = name + " 정산 상세";
             logs.filter(l => l.name === name && l.date.startsWith(mStr)).sort((a,b)=>b.date.localeCompare(a.date)).forEach(log => {
-                let pTable = '';
-                if(log.parts && log.parts.length > 0) {
-                    pTable = `<table class="detail-table"><tr><th>부품명</th><th>수량</th><th>구매가</th></tr>`;
-                    log.parts.forEach(p => pTable += `<tr><td>${p.name}</td><td>${p.qty}</td><td>${(Number(p.buyPrice)).toLocaleString()}원</td></tr>`);
-                    pTable += `</table>`;
+                let pTable = '', pSum = 0; if(log.parts && log.parts.length > 0) {
+                    pTable = `<table class="detail-table"><tr><th>부품명</th><th>수량</th><th>금액</th></tr>`;
+                    log.parts.forEach(p => { const price = toNum(p.buyPrice || p.price); const sub = price * (toNum(p.qty) || 1); pSum += sub; pTable += `<tr><td>${p.name}</td><td>${p.qty}</td><td>${sub.toLocaleString()}원</td></tr>`; }); pTable += `</table>`;
                 }
-                det.innerHTML += `<div class="detail-card"><b>날짜: ${log.date}</b><br>공임비: ${(Number(log.labor)).toLocaleString()}원<br>${pTable}</div>`;
-            });
-            document.getElementById('detailModal').style.display = 'block';
-        }
-
-        // --- 기존 로직 유지 --- [cite: 2026-02-16]
-        function createMonthButtons() {
-            const c = document.getElementById('monthButtons'); c.innerHTML = '';
-            for(let i=0; i<12; i++) {
-                const b = document.createElement('button'); b.className = `m-btn ${i===ledgerMonth?'active':''}`;
-                b.innerText = `${i+1}월`; b.onclick = () => { ledgerMonth=i; createMonthButtons(); renderLedger(); }; c.appendChild(b);
-            }
-        }
-        function renderCal() {
-            document.getElementById('currentMonthStr').innerText = `${curYear}년 ${curMonth+1}월`;
-            const g = document.getElementById('calendarGrid'); g.innerHTML = '<div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>';
-            const f = new Date(curYear, curMonth, 1).getDay(); const l = new Date(curYear, curMonth+1, 0).getDate();
-            for(let i=0; i<f; i++) g.innerHTML += '<div></div>';
-            for(let d=1; d<=l; d++) {
-                const ymd = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`;
-                const cnt = logs.filter(l => l.date === ymd).length;
-                g.innerHTML += `<div class="day-cell ${ymd===new Date().toISOString().split('T')[0]?'today':''} ${ymd===selDate?'selected':''}" onclick="selectDate('${ymd}')"><b>${d}</b><div class="badge ${cnt>0?'show':''}">${cnt}</div></div>`;
-            }
-        }
-        function renderList(ymd) {
-            const list = document.getElementById('dailyList'); list.innerHTML = '';
-            logs.filter(l => l.date === ymd).forEach(item => {
-                const d = document.createElement('div'); d.className = 'list-item';
-                d.onclick = () => openForm(item.id); d.innerHTML = `<span>${item.name}</span><span>기록보기 ▶</span>`; list.appendChild(d);
-            });
-        }
-        function selectDate(ymd) { selDate = ymd; renderCal(); renderList(ymd); }
-        function changeMonth(d) { curMonth += d; if(curMonth<0){curMonth=11; curYear--;} if(curMonth>11){curMonth=0; curYear++;} renderCal(); }
-        function goTab(t) {
-            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            const idx = {calendar:0, ledger:1, form:2, settings:3}[t];
-            document.querySelectorAll('.nav-btn')[idx].classList.add('active');
-            document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active-view');
-            if(t==='ledger') renderLedger(); if(t==='calendar') renderCal();
+                let phHtml = ''; if(log.photos && log.photos.length > 0) { phHtml = `<div class="photo-area">`; log.photos.forEach(s => phHtml += `<div class="photo-prev" style="background-image:url(${s});" onclick="window.open('${s}')"></div>`); phHtml += `</div>`; }
+                det.innerHTML += `<div class="detail-card"><b>작업일: ${log.date}</b><br>공임비: ${toNum(log.labor).toLocaleString()}원<br>부품비 합계: <span style="color:#d63384; font-weight:bold;">${pSum.toLocaleString()}원</span><br>${pTable}${phHtml}</div>`;
+            }); document.getElementById('detailModal').style.display = 'block';
         }
         function openForm(id = null) {
             goTab('form'); tParts = []; tPhotos = [];
-            if(id) {
-                const item = logs.find(l => l.id == id);
-                document.getElementById('editId').value = item.id; document.getElementById('inDate').value = item.date;
-                document.getElementById('inName').value = item.name; document.getElementById('inInfo').value = item.info || '';
-                document.getElementById('inAction').value = item.action; document.getElementById('inLabor').value = item.labor;
-                tParts = item.parts || []; tPhotos = item.photos || []; document.getElementById('btnDel').style.display = 'block';
-            } else {
-                document.getElementById('editId').value = ''; document.getElementById('inDate').value = selDate;
-                document.getElementById('inName').value = ''; document.getElementById('inInfo').value = '010-';
-                document.getElementById('inAction').value = ''; document.getElementById('inLabor').value = 0;
-                document.getElementById('btnDel').style.display = 'none';
-            }
-            renderParts(); renderPhotos(); updateCounters();
+            if(id) { const item = logs.find(l => l.id == id); document.getElementById('editId').value = item.id; document.getElementById('inDate').value = item.date; document.getElementById('inName').value = item.name; document.getElementById('inInfo').value = item.info || ''; document.getElementById('inAction').value = item.action; document.getElementById('inLabor').value = toNum(item.labor).toLocaleString(); tParts = item.parts || []; tPhotos = item.photos || []; document.getElementById('btnDel').style.display = 'block'; }
+            else { document.getElementById('editId').value = ''; document.getElementById('inDate').value = selDate; document.getElementById('inName').value = ''; document.getElementById('inInfo').value = '010-'; document.getElementById('inAction').value = ''; document.getElementById('inLabor').value = 0; document.getElementById('btnDel').style.display = 'none'; }
+            renderParts(); renderPhotos();
         }
-        function addPart() { 
-            const n=document.getElementById('partName').value, bp=Number(document.getElementById('partBuyPrice').value)||0, q=Number(document.getElementById('partQty').value)||1;
-            if(!n||!bp) return; tParts.push({name:n, buyPrice:bp, qty:q}); 
-            document.getElementById('partName').value=''; document.getElementById('partBuyPrice').value=''; document.getElementById('partQty').value='';
-            renderParts(); updateCounters();
-        }
-        function renderParts() { document.getElementById('addedPartsList').innerHTML = tParts.map((p,i)=>`<div style="font-size:0.85rem; padding:4px; border-bottom:1px solid #eee;">${p.name}(${p.qty}) - 구매가:${(p.buyPrice*p.qty).toLocaleString()}원 <button onclick="tParts.splice(${i},1);renderParts();updateCounters();" style="color:red;border:none;background:none;">X</button></div>`).join(''); }
-        function updateCounters() {
-            const l = Number(document.getElementById('inLabor').value) || 0;
-            const p = tParts.reduce((s, x) => s + (x.buyPrice * x.qty), 0);
-            document.getElementById('countLabor').innerText = l.toLocaleString() + "원";
-            document.getElementById('countParts').innerText = p.toLocaleString() + "원";
-        }
+        function addPart() { const n=document.getElementById('partName').value, bp=document.getElementById('partBuyPrice').value, q=document.getElementById('partQty').value; if(!n||!bp) return alert("부품명과 가격을 확인해 주세요."); tParts.push({name:n, buyPrice:toNum(bp), qty:toNum(q)||1}); document.getElementById('partName').value=''; document.getElementById('partBuyPrice').value=''; document.getElementById('partQty').value='1'; renderParts(); }
+        function renderParts() { document.getElementById('addedPartsList').innerHTML = tParts.map((p,i)=>`<div style="font-size:0.85rem; padding:4px; border-bottom:1px solid #eee;">${p.name}(${p.qty}) - ${(toNum(p.buyPrice || p.price)*p.qty).toLocaleString()}원 <button onclick="tParts.splice(${i},1);renderParts();" style="color:red;border:none;background:none;">X</button></div>`).join(''); }
+        function renderPhotos() { const a = document.getElementById('photoArea'); while(a.children.length > 1) a.removeChild(a.lastChild); tPhotos.forEach((s, i) => { const d = document.createElement('div'); d.className = 'photo-prev'; d.style.backgroundImage = `url(${s})`; d.onclick = () => { if(confirm("삭제?")) { tPhotos.splice(i,1); renderPhotos(); } }; a.appendChild(d); }); }
+        function handleAddPhoto(input) { if(!input.files[0]) return; const r = new FileReader(); r.onload = e => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); const max = 600; let w=img.width, h=img.height; if(w>h) { if(w>max){ h*=max/w; w=max; } } else { if(h>max){ w*=max/h; h=max; } } c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); tPhotos.push(c.toDataURL('image/jpeg', 0.7)); renderPhotos(); }; img.src = e.target.result; }; r.readAsDataURL(input.files[0]); }
         function saveData() {
-            const name = document.getElementById('inName').value; if(!name) return;
-            const data = { id: document.getElementById('editId').value ? Number(document.getElementById('editId').value) : Date.now(), date: document.getElementById('inDate').value, name, info: document.getElementById('inInfo').value, action: document.getElementById('inAction').value, labor: Number(document.getElementById('inLabor').value), parts: tParts, photos: tPhotos };
-            const idx = logs.findIndex(l => l.id == data.id);
-            if(idx > -1) logs[idx] = data; else logs.push(data);
-            localStorage.setItem(KEY, JSON.stringify(logs)); alert("저장 완료"); goTab('calendar');
+            const name = document.getElementById('inName').value; if(!name) return alert("업체명 입력!");
+            // 안전 저장 로직: 입력창에 부품 정보가 있으면 자동으로 추가 [cite: 2026-02-16]
+            const pN = document.getElementById('partName').value, pP = document.getElementById('partBuyPrice').value;
+            if(pN && pP) { tParts.push({name: pN, buyPrice: toNum(pP), qty: toNum(document.getElementById('partQty').value)||1}); }
+            const data = { id: document.getElementById('editId').value ? Number(document.getElementById('editId').value) : Date.now(), date: document.getElementById('inDate').value, name, info: document.getElementById('inInfo').value, action: document.getElementById('inAction').value, labor: toNum(document.getElementById('inLabor').value), parts: tParts, photos: tPhotos };
+            const idx = logs.findIndex(l => Number(l.id) === data.id); if(idx > -1) logs[idx] = data; else logs.push(data);
+            localStorage.setItem(KEY, JSON.stringify(logs)); alert("저장 완료"); renderCal(); renderList(selDate); goTab('calendar');
         }
+        function delData() { const idToDel = Number(document.getElementById('editId').value); if(!idToDel) return; if(confirm("삭제?")) { logs = logs.filter(l => Number(l.id) !== idToDel); localStorage.setItem(KEY, JSON.stringify(logs)); alert("삭제되었습니다."); renderCal(); renderList(selDate); goTab('calendar'); } }
+        function createMonthButtons() { const c = document.getElementById('monthButtons'); c.innerHTML = ''; for(let i=0; i<12; i++) { const b = document.createElement('button'); b.className = `m-btn ${i===ledgerMonth?'active':''}`; b.innerText = `${i+1}월`; b.onclick = () => { ledgerMonth=i; createMonthButtons(); renderLedger(); }; c.appendChild(b); } }
+        function renderCal() { document.getElementById('currentMonthStr').innerText = `${curYear}년 ${curMonth+1}월`; const g = document.getElementById('calendarGrid'); g.innerHTML = '<div>일</div><div>월</div><div>화</div><div>수</div><div>목</div><div>금</div><div>토</div>'; const f = new Date(curYear, curMonth, 1).getDay(); const l = new Date(curYear, curMonth+1, 0).getDate(); for(let i=0; i<f; i++) g.innerHTML += '<div></div>'; for(let d=1; d<=l; d++) { const ymd = `${curYear}-${String(curMonth+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`; const cnt = logs.filter(l => l.date === ymd).length; g.innerHTML += `<div class="day-cell ${ymd===new Date().toISOString().split('T')[0]?'today':''} ${ymd===selDate?'selected':''}" onclick="selectDate('${ymd}')"><b>${d}</b><div class="badge ${cnt>0?'show':''}">${cnt}</div></div>`; } }
+        function renderList(ymd) { const list = document.getElementById('dailyList'); list.innerHTML = ''; logs.filter(l => l.date === ymd).forEach(item => { const d = document.createElement('div'); d.className = 'list-item'; d.onclick = () => openForm(item.id); d.innerHTML = `<span>${item.name}</span><span>기록 보기 ▶</span>`; list.appendChild(d); }); }
+        function selectDate(ymd) { selDate = ymd; renderCal(); renderList(ymd); }
+        function changeMonth(d) { curMonth += d; if(curMonth<0){curMonth=11; curYear--;} if(curMonth>11){curMonth=0; curYear++;} renderCal(); }
         function downloadCSV() {
             let csv = "\uFEFF날짜,업체명,연락처,작업내용,공임비,부품구매가합산\n";
             logs.sort((a,b)=>b.date.localeCompare(a.date)).forEach(l => {
-                const bSum = l.parts ? l.parts.reduce((s, p) => s + (p.buyPrice * p.qty), 0) : 0;
-                csv += `${l.date},"${l.name}","${l.info||""}","${l.action.replace(/"/g,'""')}",${l.labor},${bSum}\n`;
+                let pSum = 0; if(l.parts) l.parts.forEach(p => pSum += (toNum(p.buyPrice || p.price) * (toNum(p.qty) || 1)));
+                csv += `${l.date},"${l.name}","${l.info||""}","${l.action.replace(/"/g,'""')}",${toNum(l.labor)},${pSum}\n`;
             });
-            const link = document.createElement("a"); link.href = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8;' }));
-            link.download = `경기냉동_정산_${new Date().toISOString().slice(0,10)}.csv`; link.click();
-        }
-        function uploadCSV(input) {
-            const f = input.files[0]; if (!f) return;
-            const r = new FileReader(); r.onload = (e) => {
-                let t = e.target.result; if (t.startsWith('\uFEFF')) t = t.substring(1);
-                const rows = t.split('\n').filter(row => row.trim() !== ""); const nl = [];
-                for (let i = 1; i < rows.length; i++) {
-                    const c = rows[i].match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                    if (c && c.length >= 6) {
-                        const rd = c.map(col => col.replace(/^"|"$/g, '').trim());
-                        nl.push({ id: Date.now() + i, date: rd[0], name: rd[1], info: rd[2], action: rd[3], labor: Number(rd[4]), parts: [{name:"불러온데이터", buyPrice: Number(rd[5]), qty: 1}], photos: [] });
-                    }
-                }
-                logs = [...logs, ...nl]; localStorage.setItem(KEY, JSON.stringify(logs)); location.reload();
-            }; r.readAsText(f);
-        }
-        function renderPhotos() {
-            const a = document.getElementById('photoArea'); while(a.children.length > 1) a.removeChild(a.lastChild);
-            tPhotos.forEach((s, i) => {
-                const d = document.createElement('div'); d.className = 'photo-prev'; d.style.backgroundImage = `url(${s})`;
-                d.onclick = () => { if(confirm("삭제?")) { tPhotos.splice(i,1); renderPhotos(); } }; a.appendChild(d);
-            });
-        }
-        function handleAddPhoto(input) {
-            if(!input.files[0]) return;
-            const r = new FileReader(); r.onload = e => {
-                const img = new Image(); img.onload = () => {
-                    const c = document.createElement('canvas'); const max = 600; let w=img.width, h=img.height;
-                    if(w>h) { if(w>max){ h*=max/w; w=max; } } else { if(h>max){ w*=max/h; h=max; } }
-                    c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h);
-                    tPhotos.push(c.toDataURL('image/jpeg', 0.7)); renderPhotos();
-                }; img.src = e.target.result;
-            }; r.readAsDataURL(input.files[0]);
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' }); const url = URL.createObjectURL(blob);
+            const link = document.createElement("a"); link.href = url; link.download = `경기냉동_정산.csv`; link.click();
+            setTimeout(() => { window.URL.revokeObjectURL(url); }, 100);
         }
         function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
-        function delData() { if(confirm("삭제?")){ logs=logs.filter(l=>l.id!=document.getElementById('editId').value); localStorage.setItem(KEY,JSON.stringify(logs)); goTab('calendar'); } }
     </script>
 </body>
 </html>
