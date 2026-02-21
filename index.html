@@ -80,7 +80,18 @@
         <button class="btn-main bg-blue" onclick="saveData()">저장 완료</button>
         <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none;">🗑️ 기록 삭제하기</button>
     </div>
-    <div id="viewSettings" class="view-container"><button class="btn-main bg-green" onclick="downloadCSV()">작업일지 다운로드(.csv)</button></div>
+    <div id="viewSettings" class="view-container">
+    <button class="btn-main bg-green" onclick="downloadCSV()">작업일지 다운로드(.csv)</button>
+</div>
+
+<div id="viewSettings" class="view-container">
+    <div style="background:white; padding:15px; border-radius:12px; margin-bottom:15px; font-size:0.9rem; line-height:1.5; border:1px solid #eee;">
+        <strong>📂 서버 데이터 동기화</strong><br>
+        GitHub에 업로드한 <b>data.csv</b> 파일을 읽어와서<br>현재 기기의 장부 내역과 합칩니다.
+    </div>
+    <button class="btn-main bg-blue" onclick="importCSVFromServer()">서버 데이터 불러오기(data.csv)</button>
+    <button class="btn-main bg-green" onclick="downloadCSV()" style="margin-top:10px;">현재 내역 CSV로 다운로드</button>
+</div>>
     <div id="detailModal">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px;"><h2 id="modalTitle" style="margin:0;">정산 상세</h2><button onclick="closeModal()">✕</button></div>
         <div id="customerDetails"></div>
@@ -156,6 +167,65 @@
             setTimeout(() => { window.URL.revokeObjectURL(url); }, 100);
         }
         function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+// --- 서버 CSV 불러오기 및 통합 로직 ---
+function importCSVFromServer() {
+    const fileName = 'data.csv'; // GitHub에 올릴 파일 이름
+
+    if(!confirm("서버의 'data.csv' 파일을 가져와 현재 장부와 합치시겠습니까?")) return;
+
+    // 캐시 방지를 위해 현재 시간(타임스탬프)을 주소 뒤에 붙여서 불러옵니다.
+    fetch(fileName + '?t=' + new Date().getTime())
+        .then(response => {
+            if (!response.ok) throw new Error('서버에서 data.csv 파일을 찾을 수 없습니다.\n먼저 GitHub에 파일을 업로드해 주세요.');
+            return response.text();
+        })
+        .then(csvText => {
+            const lines = csvText.split('\n');
+            let importCount = 0;
+
+            // 첫 번째 줄(제목행)은 건너뛰고 두 번째 줄부터 처리합니다.
+            for (let i = 1; i < lines.length; i++) {
+                const line = lines[i].trim();
+                if (!line) continue;
+
+                // 쉼표로 나누되, 큰따옴표 안의 쉼표는 무시하는 처리
+                const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                if (!parts || parts.length < 5) continue;
+
+                const date = parts[0].trim();
+                const name = parts[1].replace(/"/g, '').trim();
+                const info = parts[2].replace(/"/g, '').trim();
+                const action = parts[3].replace(/"/g, '').trim();
+                const labor = toNum(parts[4]);
+                const pSum = toNum(parts[5]);
+
+                // 중복 데이터 방지 (날짜, 업체명, 작업내용이 모두 같으면 패스)
+                const isExist = logs.some(l => l.date === date && l.name === name && l.action === action);
+
+                if (!isExist) {
+                    logs.push({
+                        id: Date.now() + i, // 고유 ID 부여
+                        date, name, info, action, labor,
+                        parts: [{ name: '가져온 데이터(부품합계)', buyPrice: pSum, qty: 1 }],
+                        photos: []
+                    });
+                    importCount++;
+                }
+            }
+
+            if (importCount > 0) {
+                localStorage.setItem(KEY, JSON.stringify(logs));
+                alert(`${importCount}개의 새로운 내역을 가져왔습니다.`);
+                renderCal(); // 달력 배지 업데이트
+                if(ledgerMonth !== undefined) renderLedger(); // 장부 업데이트
+            } else {
+                alert("새로 추가할 내역이 없습니다. (이미 동기화됨)");
+            }
+        })
+        .catch(error => {
+            alert(error.message);
+        });
+}
     </script>
 </body>
 </html>
