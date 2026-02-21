@@ -81,17 +81,13 @@
         <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none;">🗑️ 기록 삭제하기</button>
     </div>
     <div id="viewSettings" class="view-container">
-    <button class="btn-main bg-green" onclick="downloadCSV()">작업일지 다운로드(.csv)</button>
-</div>
-
-<div id="viewSettings" class="view-container">
     <div style="background:white; padding:15px; border-radius:12px; margin-bottom:15px; font-size:0.9rem; line-height:1.5; border:1px solid #eee;">
         <strong>📂 서버 데이터 동기화</strong><br>
         GitHub에 업로드한 <b>data.csv</b> 파일을 읽어와서<br>현재 기기의 장부 내역과 합칩니다.
     </div>
     <button class="btn-main bg-blue" onclick="importCSVFromServer()">서버 데이터 불러오기(data.csv)</button>
-    <button class="btn-main bg-green" onclick="downloadCSV()" style="margin-top:10px;">현재 내역 CSV로 다운로드</button>
-</div>>
+    <button class="btn-main bg-green" onclick="downloadCSV()" style="margin-top:10px;">작업일지 다운로드(.csv)</button>
+</div>
     <div id="detailModal">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px;"><h2 id="modalTitle" style="margin:0;">정산 상세</h2><button onclick="closeModal()">✕</button></div>
         <div id="customerDetails"></div>
