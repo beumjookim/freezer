@@ -36,22 +36,25 @@
         .photo-prev { width: 80px; height: 80px; background-size: cover; background-position: center; border-radius: 8px; border: 1px solid #ddd; flex-shrink: 0; cursor: pointer; position: relative; }
         .photo-prev::after { content: '✕'; position: absolute; top: -5px; right: -5px; background: red; color: white; width: 18px; height: 18px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: bold; }
         footer { text-align: center; padding: 20px 10px; color: #888; font-size: 0.8rem; border-top: 1px solid #eee; margin-top: 30px; }
-        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; padding: 10px 5px; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
-        .nav-btn { flex: 1; text-align: center; color: #999; font-size: 0.75rem; font-weight: bold; cursor: pointer; background: none; border: none; }
+        .bottom-nav { position: fixed; bottom: 0; left: 0; width: 100%; background: white; border-top: 1px solid #eee; display: flex; padding: 10px 2px; z-index: 99; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .nav-btn { flex: 1; text-align: center; color: #999; font-size: 0.7rem; font-weight: bold; cursor: pointer; background: none; border: none; padding: 5px 0; }
         .nav-btn.active { color: var(--primary); }
         #detailModal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: white; z-index: 1000; overflow-y: auto; padding: 20px; box-sizing: border-box; }
         .detail-card { background: #f9f9f9; border-radius: 10px; padding: 15px; margin-bottom: 15px; border: 1px solid #eee; }
         .detail-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin-top: 10px; }
         .detail-table th, .detail-table td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        .search-res-info { font-size: 0.75rem; color: #666; margin-top: 4px; }
     </style>
 </head>
 <body>
     <header>경기냉동</header>
+    
     <div id="viewCalendar" class="view-container active-view">
         <div class="cal-header"><button onclick="changeMonth(-1)">◀</button><span id="currentMonthStr"></span><button onclick="changeMonth(1)">▶</button></div>
         <div id="calendarGrid" class="cal-grid"></div>
         <div id="dailyList" style="margin-top:15px;"></div>
     </div>
+
     <div id="viewLedger" class="view-container">
         <div class="month-selector" id="monthButtons"></div>
         <div id="customerList"></div>
@@ -62,49 +65,109 @@
             <div class="summary-row total-label"><span id="yBuyTitle">올해 부품비 총합</span><span id="yBuySum">0원</span></div>
         </div>
     </div>
+
+    <div id="viewSearch" class="view-container">
+        <label>🔍 통합 검색</label>
+        <input type="text" id="searchInput" placeholder="업체명, 번호, 부품, 작업내용..." oninput="runSearch()">
+        <div id="searchResultCount" style="margin: 10px 0; font-size: 0.9rem; color: var(--primary); font-weight: bold;"></div>
+        <div id="searchResultList"></div>
+    </div>
+
     <div id="viewForm" class="view-container">
         <input type="hidden" id="editId"><label>📅 날짜</label><input type="date" id="inDate"><label>🏢 업체명</label><input type="text" id="inName"><label>📞 연락처</label><input type="text" id="inInfo" oninput="formatPhone(this)" placeholder="010-0000-0000"><label>📝 작업내용</label><textarea id="inAction" rows="3"></textarea>
-        <label>🔧 부품 추가 (금액에 콤마 가능)</label>
+        <label>🔧 부품 추가</label>
         <div style="background:#fff; padding:10px; border-radius:8px; border:1px solid #ddd;">
             <input type="text" id="partName" placeholder="부품명">
             <div style="display:flex; gap:5px;">
-                <input type="text" id="partBuyPrice" placeholder="구매가(예: 1,000)" style="width:100%;" oninput="formatComma(this)">
+                <input type="text" id="partBuyPrice" placeholder="가격" style="width:100%;" oninput="formatComma(this)">
                 <input type="number" id="partQty" placeholder="수량" style="width:70px;" value="1">
             </div>
             <button class="btn-main bg-gray" onclick="addPart()" style="padding:8px; font-size:0.9rem;">+ 부품 추가</button>
         </div>
         <div id="addedPartsList" style="margin-top:10px;"></div>
-        <label>💰 공임비 (금액에 콤마 가능)</label>
+        <label>💰 공임비</label>
         <input type="text" id="inLabor" value="0" oninput="formatComma(this)">
         <label>📷 사진</label><div class="photo-area" id="photoArea"><label style="width:80px; height:80px; border:2px dashed #ccc; display:flex; justify-content:center; align-items:center; border-radius:8px; color:#aaa; font-size:24px; cursor:pointer;">+<input type="file" accept="image/*" style="display:none;" onchange="handleAddPhoto(this)"></label></div>
         <button class="btn-main bg-blue" onclick="saveData()">저장 완료</button>
         <button class="btn-main bg-red" id="btnDel" onclick="delData()" style="display:none;">🗑️ 기록 삭제하기</button>
     </div>
+
     <div id="viewSettings" class="view-container">
-    <div style="background:white; padding:15px; border-radius:12px; margin-bottom:15px; font-size:0.9rem; line-height:1.5; border:1px solid #eee;">
-        <strong>📂 서버 데이터 동기화</strong><br>
-        GitHub에 업로드한 <b>data.csv</b> 파일을 읽어와서<br>현재 기기의 장부 내역과 합칩니다.
+        <div style="background:white; padding:15px; border-radius:12px; margin-bottom:15px; font-size:0.9rem; line-height:1.5; border:1px solid #eee;">
+            <strong>📂 서버 데이터 동기화</strong><br>
+            GitHub에 업로드한 <b>data.csv</b> 파일을 읽어와서<br>현재 기기의 장부 내역과 합칩니다.
+        </div>
+        <button class="btn-main bg-blue" onclick="importCSVFromServer()">서버 데이터 불러오기(data.csv)</button>
+        <button class="btn-main bg-green" onclick="downloadCSV()" style="margin-top:10px;">작업일지 다운로드(.csv)</button>
     </div>
-    <button class="btn-main bg-blue" onclick="importCSVFromServer()">서버 데이터 불러오기(data.csv)</button>
-    <button class="btn-main bg-green" onclick="downloadCSV()" style="margin-top:10px;">작업일지 다운로드(.csv)</button>
-</div>
+
     <div id="detailModal">
         <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:2px solid var(--primary); padding-bottom:10px;"><h2 id="modalTitle" style="margin:0;">정산 상세</h2><button onclick="closeModal()">✕</button></div>
         <div id="customerDetails"></div>
     </div>
+
     <footer><b>경기냉동</b> | 대표 송기천</footer>
-    <div class="bottom-nav"><button class="nav-btn active" onclick="goTab('calendar')">📅<br>달력</button><button class="nav-btn" onclick="goTab('ledger')">📑<br>장부</button><button class="nav-btn" onclick="openForm()">✏️<br>등록</button><button class="nav-btn" onclick="goTab('settings')">⚙️<br>설정</button></div>
+
+    <div class="bottom-nav">
+        <button class="nav-btn active" onclick="goTab('calendar')">📅<br>달력</button>
+        <button class="nav-btn" onclick="goTab('ledger')">📑<br>장부</button>
+        <button class="nav-btn" onclick="goTab('search')">🔍<br>검색</button>
+        <button class="nav-btn" onclick="openForm()">✏️<br>등록</button>
+        <button class="nav-btn" onclick="goTab('settings')">⚙️<br>설정</button>
+    </div>
+
     <script>
         const KEY = 'ggFreezerLogs_V2'; let logs = JSON.parse(localStorage.getItem(KEY)) || [];
         let curYear, curMonth, selDate, ledgerMonth, tParts = [], tPhotos = [];
         window.onload = () => { const now = new Date(); curYear = now.getFullYear(); curMonth = now.getMonth(); ledgerMonth = curMonth; selDate = new Date(now - now.getTimezoneOffset() * 60000).toISOString().split('T')[0]; createMonthButtons(); renderCal(); renderList(selDate); };
         
-        // --- 콤마 및 숫자 처리 핵심 로직 ---
         function toNum(v) { if (!v) return 0; return Number(String(v).replace(/[^0-9]/g, "")) || 0; }
         function formatComma(el) { let v = el.value.replace(/[^0-9]/g, ""); if(v === "") { el.value = "0"; return; } el.value = Number(v).toLocaleString(); }
         function formatPhone(el) { let v = el.value.replace(/[^0-9]/g, ""); if (v.length < 3) v = "010"; let r = "010-"; if (v.length > 3) { let n = v.substring(3); if (n.length > 4) r += n.substring(0, 4) + "-" + n.substring(4, 8); else r += n; } el.value = r; }
 
-        function goTab(t) { document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view')); document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); const idx = {calendar:0, ledger:1, form:2, settings:3}[t]; document.querySelectorAll('.nav-btn')[idx].classList.add('active'); document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active-view'); if(t==='ledger') renderLedger(); if(t==='calendar') renderCal(); }
+        function goTab(t) { 
+            document.querySelectorAll('.view-container').forEach(v => v.classList.remove('active-view')); 
+            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active')); 
+            const idx = {calendar:0, ledger:1, search:2, form:3, settings:4}[t]; 
+            document.querySelectorAll('.nav-btn')[idx].classList.add('active'); 
+            document.getElementById('view' + t.charAt(0).toUpperCase() + t.slice(1)).classList.add('active-view'); 
+            if(t==='ledger') renderLedger(); 
+            if(t==='calendar') renderCal(); 
+            if(t==='search') { document.getElementById('searchInput').focus(); runSearch(); }
+        }
+
+        // --- 검색 엔진 로직 ---
+        function runSearch() {
+            const word = document.getElementById('searchInput').value.toLowerCase().trim();
+            const resDiv = document.getElementById('searchResultList');
+            const countDiv = document.getElementById('searchResultCount');
+            resDiv.innerHTML = '';
+            
+            if(!word) { countDiv.innerText = '검색어를 입력하세요.'; return; }
+
+            const filtered = logs.filter(l => {
+                const inParts = l.parts ? l.parts.some(p => p.name.toLowerCase().includes(word)) : false;
+                return l.name.toLowerCase().includes(word) || 
+                       (l.info && l.info.includes(word)) || 
+                       l.action.toLowerCase().includes(word) || 
+                       inParts;
+            }).sort((a,b) => b.date.localeCompare(a.date));
+
+            countDiv.innerText = `총 ${filtered.length}건이 검색되었습니다.`;
+
+            filtered.forEach(item => {
+                const d = document.createElement('div');
+                d.className = 'list-item';
+                d.onclick = () => openForm(item.id);
+                const partInfo = item.parts && item.parts.length > 0 ? ` | 부품: ${item.parts.map(p=>p.name).join(', ')}` : '';
+                d.innerHTML = `<div>
+                    <div style="font-weight:bold;">${item.name} <span style="font-size:0.8rem; color:#888;">(${item.date})</span></div>
+                    <div class="search-res-info">${item.action.substring(0,25)}${item.action.length>25?'...':''}${partInfo}</div>
+                </div><span>▶</span>`;
+                resDiv.appendChild(d);
+            });
+        }
+
         function renderLedger() {
             const listDiv = document.getElementById('customerList'); listDiv.innerHTML = ''; const mStr = `${curYear}-${String(ledgerMonth+1).padStart(2,'0')}`;
             const mLogs = logs.filter(l => l.date.startsWith(mStr)); const yLogs = logs.filter(l => l.date.startsWith(`${curYear}`));
@@ -139,7 +202,6 @@
         function handleAddPhoto(input) { if(!input.files[0]) return; const r = new FileReader(); r.onload = e => { const img = new Image(); img.onload = () => { const c = document.createElement('canvas'); const max = 600; let w=img.width, h=img.height; if(w>h) { if(w>max){ h*=max/w; w=max; } } else { if(h>max){ w*=max/h; h=max; } } c.width=w; c.height=h; c.getContext('2d').drawImage(img,0,0,w,h); tPhotos.push(c.toDataURL('image/jpeg', 0.7)); renderPhotos(); }; img.src = e.target.result; }; r.readAsDataURL(input.files[0]); }
         function saveData() {
             const name = document.getElementById('inName').value; if(!name) return alert("업체명 입력!");
-            // 안전 저장 로직: 입력창에 부품 정보가 있으면 자동으로 추가 [cite: 2026-02-16]
             const pN = document.getElementById('partName').value, pP = document.getElementById('partBuyPrice').value;
             if(pN && pP) { tParts.push({name: pN, buyPrice: toNum(pP), qty: toNum(document.getElementById('partQty').value)||1}); }
             const data = { id: document.getElementById('editId').value ? Number(document.getElementById('editId').value) : Date.now(), date: document.getElementById('inDate').value, name, info: document.getElementById('inInfo').value, action: document.getElementById('inAction').value, labor: toNum(document.getElementById('inLabor').value), parts: tParts, photos: tPhotos };
@@ -163,65 +225,40 @@
             setTimeout(() => { window.URL.revokeObjectURL(url); }, 100);
         }
         function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
-// --- 서버 CSV 불러오기 및 통합 로직 ---
-function importCSVFromServer() {
-    const fileName = 'data.csv'; // GitHub에 올릴 파일 이름
 
-    if(!confirm("서버의 'data.csv' 파일을 가져와 현재 장부와 합치시겠습니까?")) return;
-
-    // 캐시 방지를 위해 현재 시간(타임스탬프)을 주소 뒤에 붙여서 불러옵니다.
-    fetch(fileName + '?t=' + new Date().getTime())
-        .then(response => {
-            if (!response.ok) throw new Error('서버에서 data.csv 파일을 찾을 수 없습니다.\n먼저 GitHub에 파일을 업로드해 주세요.');
-            return response.text();
-        })
-        .then(csvText => {
-            const lines = csvText.split('\n');
-            let importCount = 0;
-
-            // 첫 번째 줄(제목행)은 건너뛰고 두 번째 줄부터 처리합니다.
-            for (let i = 1; i < lines.length; i++) {
-                const line = lines[i].trim();
-                if (!line) continue;
-
-                // 쉼표로 나누되, 큰따옴표 안의 쉼표는 무시하는 처리
-                const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
-                if (!parts || parts.length < 5) continue;
-
-                const date = parts[0].trim();
-                const name = parts[1].replace(/"/g, '').trim();
-                const info = parts[2].replace(/"/g, '').trim();
-                const action = parts[3].replace(/"/g, '').trim();
-                const labor = toNum(parts[4]);
-                const pSum = toNum(parts[5]);
-
-                // 중복 데이터 방지 (날짜, 업체명, 작업내용이 모두 같으면 패스)
-                const isExist = logs.some(l => l.date === date && l.name === name && l.action === action);
-
-                if (!isExist) {
-                    logs.push({
-                        id: Date.now() + i, // 고유 ID 부여
-                        date, name, info, action, labor,
-                        parts: [{ name: '가져온 데이터(부품합계)', buyPrice: pSum, qty: 1 }],
-                        photos: []
-                    });
-                    importCount++;
-                }
-            }
-
-            if (importCount > 0) {
-                localStorage.setItem(KEY, JSON.stringify(logs));
-                alert(`${importCount}개의 새로운 내역을 가져왔습니다.`);
-                renderCal(); // 달력 배지 업데이트
-                if(ledgerMonth !== undefined) renderLedger(); // 장부 업데이트
-            } else {
-                alert("새로 추가할 내역이 없습니다. (이미 동기화됨)");
-            }
-        })
-        .catch(error => {
-            alert(error.message);
-        });
-}
+        function importCSVFromServer() {
+            const fileName = 'data.csv'; 
+            if(!confirm("서버의 'data.csv' 파일을 가져와 현재 장부와 합치시겠습니까?")) return;
+            fetch(fileName + '?t=' + new Date().getTime())
+                .then(response => { if (!response.ok) throw new Error('파일을 찾을 수 없습니다.'); return response.text(); })
+                .then(csvText => {
+                    const lines = csvText.split('\n');
+                    let importCount = 0;
+                    for (let i = 1; i < lines.length; i++) {
+                        const line = lines[i].trim();
+                        if (!line) continue;
+                        const parts = line.match(/(".*?"|[^",\s]+)(?=\s*,|\s*$)/g);
+                        if (!parts || parts.length < 5) continue;
+                        const date = parts[0].trim();
+                        const name = parts[1].replace(/"/g, '').trim();
+                        const info = parts[2].replace(/"/g, '').trim();
+                        const action = parts[3].replace(/"/g, '').trim();
+                        const labor = toNum(parts[4]);
+                        const pSum = toNum(parts[5]);
+                        const isExist = logs.some(l => l.date === date && l.name === name && l.action === action);
+                        if (!isExist) {
+                            logs.push({ id: Date.now() + i, date, name, info, action, labor, parts: [{ name: '가져온 데이터(부품합계)', buyPrice: pSum, qty: 1 }], photos: [] });
+                            importCount++;
+                        }
+                    }
+                    if (importCount > 0) {
+                        localStorage.setItem(KEY, JSON.stringify(logs));
+                        alert(`${importCount}개의 내역을 가져왔습니다.`);
+                        renderCal(); if(ledgerMonth !== undefined) renderLedger();
+                    } else { alert("새로 추가할 내역이 없습니다."); }
+                })
+                .catch(error => { alert(error.message); });
+        }
     </script>
 </body>
 </html>
